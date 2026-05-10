@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Decade Evolution — Cinema</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+
+  <div class="transition-overlay" id="overlay"></div>
+
+  <div class="stage">
+    <div class="rail"></div>
+    <div class="spot spot-l"></div>
+    <div class="spot spot-c"></div>
+    <div class="spot spot-r"></div>
+    <div class="curtain curtain-l"></div>
+    <div class="curtain curtain-r"></div>
+    <div class="floor"></div>
+
+    <div class="content">
+      <div class="title-wrap">
+        <div class="title">Decade Evolution</div>
+        <div class="subtitle">A journey through the history of cinema</div>
+      </div>
+
+      <div class="timeline-outer" id="tlOuter">
+        <div class="timeline-line"></div>
+        <div class="timeline-arrow">→</div>
+        <div class="track" id="track"></div>
+      </div>
+
+      <div class="dots" id="dots"></div>
+
+      <div class="cta-wrap">
+        <a class="cta-btn" id="ctaBtn" href="#">
+          <span>Explore the decade</span>
+          <span>→</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="hint">↕ Scroll to navigate</div>
+  </div>
+
+  <script src="js/index.js"></script>
+</body>
+</html>

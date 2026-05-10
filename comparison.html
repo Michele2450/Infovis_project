@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Film comparison</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/comparison.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="topbar__brand" href="index.html">Cinema through the decades</a>
+      <div class="topbar__center">
+        <span>Comparative analysis</span>
+        <strong id="comparisonTitle">Film vs decade</strong>
+      </div>
+      <a class="topbar__back" data-back-link href="index.html">Back to decade</a>
+    </header>
+
+    <section class="hero-panel">
+      <div class="hero-copy">
+        <p class="eyebrow">Reading the comparison</p>
+        <h1>How one film behaves against the decade baseline.</h1>
+        <p id="comparisonSubtitle"></p>
+      </div>
+
+      <div class="hero-cards">
+        <article class="hero-card hero-card--film">
+          <span>Selected film</span>
+          <strong id="heroFilmTitle">—</strong>
+          <small id="heroFilmMeta">—</small>
+        </article>
+        <article class="hero-card hero-card--decade">
+          <span>Decade reference</span>
+          <strong id="heroDecadeTitle">—</strong>
+          <small id="heroDecadeMeta">—</small>
+        </article>
+      </div>
+    </section>
+
+    <main class="comparison-grid">
+      <section class="panel">
+        <p class="eyebrow">Quick read</p>
+        <h2>Key metrics</h2>
+        <div class="metric-grid" id="metricGrid"></div>
+      </section>
+
+      <section class="panel">
+        <p class="eyebrow">Profile comparison</p>
+        <h2>Magnitude against the decade average</h2>
+        <div class="profile-rows" id="profileRows"></div>
+      </section>
+
+      <section class="panel">
+        <p class="eyebrow">Genre fit</p>
+        <h2>How the film aligns with the decade's genre mix</h2>
+        <div class="genre-rows" id="genreRows"></div>
+      </section>
+
+      <section class="panel">
+        <p class="eyebrow">Ranking placement</p>
+        <h2>Position inside the decade ranking</h2>
+        <div class="placement-track" id="placementTrack"></div>
+        <p class="panel-copy" id="placementSummary"></p>
+      </section>
+
+      <section class="panel">
+        <p class="eyebrow">Slope graph</p>
+        <h2>Normalized film vs decade profile</h2>
+        <svg class="slope-svg" id="slopeChart" viewBox="0 0 560 260" role="img" aria-label="Slope graph comparing normalized metrics"></svg>
+      </section>
+
+      <section class="panel panel--wide">
+        <p class="eyebrow">Interpretation</p>
+        <h2>What the numbers suggest</h2>
+        <p class="panel-copy" id="takeawayLead"></p>
+        <p class="panel-copy" id="takeawaySupport"></p>
+        <a class="primary-link" data-back-link href="index.html">Return to decade page</a>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/data/all_decades.js"></script>
+  <script src="js/catalog.js"></script>
+  <script src="js/comparison.js"></script>
+</body>
+</html>
