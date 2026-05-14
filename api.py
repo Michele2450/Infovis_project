@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
-"""
-api.py  —  Cinema through the Decades · Flask back-end
-"""
+"""api.py — Cinema through the Decades · Flask back-end"""
 
-import sqlite3
-import os
+import sqlite3, os
 from flask import Flask, jsonify, abort
 from flask_cors import CORS
 
@@ -19,19 +16,14 @@ MIN_VOTES = 500
 app = Flask(__name__)
 CORS(app)
 
-
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
-
 def decade_int(decade_str):
-    try:
-        return int(decade_str.replace("s", ""))
-    except ValueError:
-        abort(404, description=f"Invalid decade '{decade_str}'")
-
+    try: return int(decade_str.replace("s", ""))
+    except: abort(404, description=f"Invalid decade '{decade_str}'")
 
 def build_film(row, rank):
     genres_raw = row["genres"] or ""
@@ -45,19 +37,18 @@ def build_film(row, rank):
         "votes":    row["numVotes"],
         "runtime":  row["runtime"],
         "genres":   genres,
-        "director": None,
+        "director": row["director"],
         "actor":    None,
         "summary":  None,
         "poster":   None,
     }
-
 
 def build_decade_response(decade_str):
     decade = decade_int(decade_str)
     conn   = get_db()
 
     films_rows = conn.execute(
-        "SELECT tconst, primaryTitle, localTitle, startYear, averageRating, numVotes, runtime, genres "
+        "SELECT tconst, primaryTitle, localTitle, startYear, averageRating, numVotes, runtime, genres, director "
         "FROM movies "
         "WHERE decade = ? AND numVotes >= ? AND averageRating IS NOT NULL "
         "ORDER BY numVotes DESC LIMIT ?",
@@ -67,7 +58,7 @@ def build_decade_response(decade_str):
     films = [build_film(r, i + 1) for i, r in enumerate(films_rows)]
 
     stats = conn.execute(
-        "SELECT ROUND(AVG(averageRating), 2) AS avg_rating, "
+        "SELECT ROUND(AVG(averageRating),2) AS avg_rating, "
         "ROUND(AVG(numVotes)) AS avg_votes, "
         "ROUND(AVG(runtime)) AS avg_runtime, "
         "MIN(averageRating) AS min_rating, "
@@ -77,7 +68,7 @@ def build_decade_response(decade_str):
         (decade, MIN_VOTES)
     ).fetchone()
 
-    # Build topGenres from the top-20 films
+    # genreStats: ogni genere appare in quanti film sui TOP_N
     genre_counts = {}
     for f in films:
         for g in f["genres"]:
@@ -90,7 +81,6 @@ def build_decade_response(decade_str):
     ]
 
     conn.close()
-
     return {
         "decade":     decade_str,
         "avgRating":  stats["avg_rating"],
@@ -102,51 +92,38 @@ def build_decade_response(decade_str):
         "films":      films,
     }
 
-
 @app.route("/api/decade/<string:decade>")
 def api_decade(decade):
     return jsonify(build_decade_response(decade))
-
 
 @app.route("/api/decade/<string:decade>/film/<string:tconst>")
 def api_film(decade, tconst):
     decade_int(decade)
     conn = get_db()
     row = conn.execute(
-        "SELECT tconst, primaryTitle, localTitle, startYear, averageRating, numVotes, runtime, genres "
-        "FROM movies WHERE tconst = ?",
-        (tconst,)
+        "SELECT tconst, primaryTitle, localTitle, startYear, averageRating, numVotes, runtime, genres, director "
+        "FROM movies WHERE tconst = ?", (tconst,)
     ).fetchone()
     conn.close()
-    if not row:
-        abort(404, description=f"Film '{tconst}' not found")
+    if not row: abort(404, description=f"Film '{tconst}' not found")
     return jsonify(build_film(row, rank=0))
-
 
 @app.route("/api/decades")
 def api_decades():
     conn = get_db()
     rows = conn.execute(
-        "SELECT decade, COUNT(*) AS total, ROUND(AVG(averageRating), 2) AS avg_rating "
+        "SELECT decade, COUNT(*) AS total, ROUND(AVG(averageRating),2) AS avg_rating "
         "FROM movies WHERE decade IS NOT NULL AND numVotes >= ? AND averageRating IS NOT NULL "
-        "GROUP BY decade ORDER BY decade",
-        (MIN_VOTES,)
+        "GROUP BY decade ORDER BY decade", (MIN_VOTES,)
     ).fetchall()
     conn.close()
-    return jsonify([
-        {"decade": f"{r['decade']}s", "total": r["total"], "avgRating": r["avg_rating"]}
-        for r in rows
-    ])
-
+    return jsonify([{"decade": f"{r['decade']}s", "total": r["total"], "avgRating": r["avg_rating"]} for r in rows])
 
 @app.errorhandler(404)
-def not_found(e):
-    return jsonify({"error": str(e)}), 404
+def not_found(e): return jsonify({"error": str(e)}), 404
 
 @app.errorhandler(500)
-def server_error(e):
-    return jsonify({"error": "Internal server error"}), 500
-
+def server_error(e): return jsonify({"error": "Internal server error"}), 500
 
 if __name__ == "__main__":
     import sys
