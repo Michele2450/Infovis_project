@@ -1,41 +1,33 @@
-/* ── Patch: colori più leggibili ── */
-.film-list__body small {
-  color: rgba(232, 213, 163, 0.65);
+/* ── Nascondi poster, summary, plot ── */
+.detail-card::before        { display: none !important; }
+.detail-card__summary       { display: none !important; }
+#detailSummary              { display: none !important; }
+
+/* ── Rimuovi griglia a 2 colonne (era per il poster) ── */
+.detail-card {
+  display: block !important;
 }
-.detail-meta-line {
-  color: rgba(232, 213, 163, 0.75) !important;
-}
-.ranking-caption,
-.insight-card p {
-  color: rgba(232, 213, 163, 0.65);
-}
-.overview-bar span {
-  color: rgba(232, 213, 163, 0.8);
-}
-.overview-bar strong {
-  color: var(--gold);
-  font-size: 12px;
+.detail-card h2 {
+  margin-top: 0 !important;
+  font-size: clamp(20px, 2.4vw, 30px) !important;
 }
 
-/* ── Patch: titoli lista non escono dal box ── */
+/* ── Nascondi genre-pills se vuota ── */
+.genre-pills:empty { display: none !important; }
+
+/* ── Colori più leggibili ── */
+.film-list__body small     { color: rgba(232, 213, 163, 0.65); }
+.detail-meta-line          { color: rgba(232, 213, 163, 0.75) !important; }
+.ranking-caption           { color: rgba(232, 213, 163, 0.65); }
+.insight-card p            { color: rgba(232, 213, 163, 0.65); }
+.overview-bar span         { color: rgba(232, 213, 163, 0.8);  }
+.overview-bar strong       { color: var(--gold); font-size: 12px; }
+
+/* ── Titoli lista: tronca se troppo lunghi ── */
 .film-list__body strong {
   max-width: 160px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   display: block;
-}
-
-/* ── Patch: nascondi summary e poster ── */
-.detail-card__summary {
-  display: none !important;
-}
-.detail-card::before {
-  display: none !important;
-}
-.detail-card {
-  grid-template-columns: 1fr !important;
-}
-.detail-card h2 {
-  margin-top: 0 !important;
 }

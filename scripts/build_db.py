@@ -1,16 +1,10 @@
-#!/usr/bin/env python3
-"""
-build_db.py - runtime e directorName dal CSV, genres da title.basics.tsv.gz
-"""
-
-import argparse, csv, gzip, sqlite3, sys
+import argparse, csv, sqlite3, sys
 from pathlib import Path
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--csv",    default="data/raw/imdb_english.csv")
-    p.add_argument("--basics", default="data/raw/title.basics.tsv.gz")
-    p.add_argument("--db",     default="data/processed/imdb.db")
+    p.add_argument("--csv", default="data/raw/imdb_english.csv")
+    p.add_argument("--db",  default="data/processed/imdb.db")
     return p.parse_args()
 
 DDL = """
@@ -50,77 +44,70 @@ def safe_float(v):
     try: return float(v)
     except: return None
 
-def load_genres(basics_path):
-    path = Path(basics_path)
-    if not path.exists():
-        print(f"  ⚠ title.basics.tsv.gz non trovato — genres sarà null")
-        return {}
-    print(f"→ Caricamento genres da {basics_path} …")
-    data = {}
-    opener = gzip.open if str(basics_path).endswith(".gz") else open
-    with opener(path, "rt", encoding="utf-8") as fh:
-        reader = csv.DictReader(fh, delimiter="\t")
-        for row in reader:
-            tconst = (row.get("tconst") or "").strip()
-            genres = (row.get("genres") or "").strip()
-            if genres in ("\\N", ""): genres = None
-            if tconst: data[tconst] = genres
-    print(f"  ✓ {len(data):,} entries caricati")
-    return data
+def clean(v):
+    v = (v or "").strip()
+    return None if v in ("", "\\N") else v
 
-def import_csv(conn, csv_path, genres_map):
+def import_csv(conn, csv_path):
     path = Path(csv_path)
     if not path.exists():
         sys.exit(f"ERRORE: CSV non trovato in '{csv_path}'")
+
     total, batch = 0, []
     with open(path, newline="", encoding="utf-8") as fh:
         reader = csv.DictReader(fh)
         for row in reader:
-            tconst  = (row.get("tconst") or "").strip()
-            year    = safe_int(row.get("startYear") or row.get("year"))
-            decade  = (year // 10) * 10 if year else None
-            runtime = safe_int(row.get("runtimeMinutes") or row.get("runtime"))
-            genres  = genres_map.get(tconst)
-            director = (row.get("directorName") or "").strip() or None
+            year   = safe_int(row.get("startYear") or row.get("year"))
+            decade = (year // 10) * 10 if year else None
+
+            # Genres: può arrivare con virgolette tipo "Drama,Crime"
+            genres_raw = (row.get("genres") or "").strip().strip('"')
+            genres = None if genres_raw in ("", "\\N") else genres_raw
+
             batch.append((
-                tconst,
-                (row.get("titleType") or "").strip() or None,
+                (row.get("tconst") or "").strip(),
+                clean(row.get("titleType")),
                 (row.get("primaryTitle") or row.get("title", "")).strip(),
-                (row.get("title") or "").strip() or None,
-                year, decade,
-                (row.get("region") or "").strip() or None,
-                (row.get("language") or "").strip() or None,
+                clean(row.get("title")),
+                year,
+                decade,
+                clean(row.get("region")),
+                clean(row.get("language")),
                 safe_float(row.get("averageRating") or row.get("rating")),
                 safe_int(row.get("numVotes") or row.get("votes")),
-                runtime, genres, director,
+                safe_int(row.get("runtimeMinutes") or row.get("runtime")),
+                genres,
+                clean(row.get("directorName") or row.get("director")),
             ))
+
             if len(batch) >= BATCH:
                 conn.executemany(INSERT_SQL, batch)
                 conn.commit()
                 total += len(batch)
                 batch.clear()
                 print(f"  … {total:,} righe inserite", end="\r", flush=True)
+
     if batch:
         conn.executemany(INSERT_SQL, batch)
         conn.commit()
         total += len(batch)
+
     print(f"\n✓ Import completato — {total:,} righe totali")
 
 def report(conn):
     print("\nRiepilogo per decade:")
     print(f"  {'Decade':<10}  {'Film':>8}  {'Avg rating':>10}  {'Con runtime':>11}  {'Con genres':>10}  {'Con director':>12}")
     print("  " + "-" * 68)
-    cur = conn.execute("""
+    for r in conn.execute("""
         SELECT decade, COUNT(*) AS cnt,
-               ROUND(AVG(averageRating),2) AS avg_r,
-               SUM(CASE WHEN runtime  IS NOT NULL THEN 1 ELSE 0 END) AS has_rt,
-               SUM(CASE WHEN genres   IS NOT NULL THEN 1 ELSE 0 END) AS has_g,
-               SUM(CASE WHEN director IS NOT NULL THEN 1 ELSE 0 END) AS has_d
+               ROUND(AVG(averageRating),2),
+               SUM(CASE WHEN runtime  IS NOT NULL THEN 1 ELSE 0 END),
+               SUM(CASE WHEN genres   IS NOT NULL THEN 1 ELSE 0 END),
+               SUM(CASE WHEN director IS NOT NULL THEN 1 ELSE 0 END)
         FROM movies
         WHERE decade IS NOT NULL AND averageRating IS NOT NULL AND numVotes >= 500
         GROUP BY decade ORDER BY decade
-    """)
-    for r in cur:
+    """):
         print(f"  {r[0]}s{'':<7}  {r[1]:>8,}  {r[2]:>10}  {r[3]:>11,}  {r[4]:>10,}  {r[5]:>12,}")
 
 def main():
@@ -131,15 +118,15 @@ def main():
         db_path.unlink()
         print("→ DB precedente eliminato")
     print(f"→ CSV sorgente : {args.csv}")
-    print(f"→ Title basics : {args.basics}")
     print(f"→ DB target    : {args.db}\n")
-    genres_map = load_genres(args.basics)
+
     conn = sqlite3.connect(args.db)
     conn.execute("PRAGMA journal_mode=WAL;")
     conn.execute("PRAGMA synchronous=NORMAL;")
     conn.executescript(DDL)
     conn.commit()
-    import_csv(conn, args.csv, genres_map)
+
+    import_csv(conn, args.csv)
     report(conn)
     conn.close()
     print(f"\n✓ Database scritto in {args.db}")
