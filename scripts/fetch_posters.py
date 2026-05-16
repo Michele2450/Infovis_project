@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+"""
+fetch_posters.py
+----------------
+Recupera i poster TMDb SOLO per i top 20 film per decade.
+Massimo 260 chiamate API in totale.
+
+Usage:
+  python scripts/fetch_posters.py --key TUA_API_KEY_TMDB
+"""
+
+import argparse, sqlite3, time, os
+from pathlib import Path
+
+try:
+    import requests
+except ImportError:
+    raise SystemExit("Installa requests: pip install requests")
+
+TMDB_BASE   = "https://api.themoviedb.org/3"
+POSTER_BASE = "https://image.tmdb.org/t/p/w500"
+DB_DEFAULT  = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+              "..", "data", "processed", "imdb.db")
+
+DECADES = [1900,1910,1920,1930,1940,1950,1960,1970,1980,1990,2000,2010,2020]
+MIN_VOTES = 500
+TOP_N     = 20
+
+def parse_args():
+    p = argparse.ArgumentParser()
+    p.add_argument("--key",   required=True, help="TMDb API key")
+    p.add_argument("--db",    default=DB_DEFAULT)
+    p.add_argument("--delay", type=float, default=0.25)
+    p.add_argument("--reset", action="store_true",
+                   help="Riscarica anche i poster già presenti")
+    return p.parse_args()
+
+def ensure_poster_column(conn):
+    cols = [r[1] for r in conn.execute("PRAGMA table_info(movies)")]
+    if "poster" not in cols:
+        conn.execute("ALTER TABLE movies ADD COLUMN poster TEXT")
+        conn.commit()
+        print("✓ Colonna 'poster' aggiunta")
+
+def get_top20_tconsts(conn):
+    """Restituisce i tconst dei top-20 per ogni decade (ordine numVotes DESC)."""
+    tconsts = []
+    for decade in DECADES:
+        rows = conn.execute(
+            "SELECT tconst, primaryTitle, poster FROM movies "
+            "WHERE decade=? AND numVotes>=? AND averageRating IS NOT NULL "
+            "ORDER BY numVotes DESC LIMIT ?",
+            (decade, MIN_VOTES, TOP_N)
+        ).fetchall()
+        for r in rows:
+            tconsts.append((r[0], r[1], r[2], decade))
+    return tconsts
+
+def fetch_poster(tconst, api_key, session):
+    try:
+        resp = session.get(
+            f"{TMDB_BASE}/find/{tconst}",
+            params={"api_key": api_key, "external_source": "imdb_id"},
+            timeout=10
+        )
+        resp.raise_for_status()
+        data = resp.json()
+    except requests.RequestException as e:
+        print(f"    ⚠ Errore rete: {e}")
+        return None
+
+    for key in ("movie_results", "tv_results", "tv_episode_results"):
+        results = data.get(key, [])
+        if results and results[0].get("poster_path"):
+            return POSTER_BASE + results[0]["poster_path"]
+    return None
+
+def main():
+    args  = parse_args()
+    conn  = sqlite3.connect(args.db)
+    conn.row_factory = sqlite3.Row
+    ensure_poster_column(conn)
+
+    films = get_top20_tconsts(conn)
+    if not args.reset:
+        films = [(t, title, poster, d) for t, title, poster, d in films if not poster]
+
+    print(f"→ Film da processare: {len(films)} (su un massimo di {len(DECADES)*TOP_N})\n")
+
+    session = requests.Session()
+    found = missing = 0
+
+    for i, (tconst, title, _, decade) in enumerate(films, 1):
+        poster_url = fetch_poster(tconst, args.api_key if hasattr(args, 'api_key') else args.key, session)
+        if poster_url:
+            conn.execute("UPDATE movies SET poster=? WHERE tconst=?", (poster_url, tconst))
+            found += 1
+            status = "✓"
+        else:
+            missing += 1
+            status = "–"
+
+        if i % 20 == 0:
+            conn.commit()
+
+        print(f"  [{i:>3}/{len(films)}] {status}  {decade}s  {tconst}  {title[:45]}")
+        time.sleep(args.delay)
+
+    conn.commit()
+    conn.close()
+    print(f"\n✓ Fatto — trovati: {found}, non trovati: {missing}")
+
+if __name__ == "__main__":
+    main()

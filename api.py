@@ -40,7 +40,7 @@ def build_film(row, rank):
         "director": row["director"],
         "actor":    None,
         "summary":  None,
-        "poster":   None,
+        "poster":   row["poster"] if row["poster"] else None,
     }
 
 def build_decade_response(decade_str):
@@ -48,10 +48,10 @@ def build_decade_response(decade_str):
     conn   = get_db()
 
     films_rows = conn.execute(
-        "SELECT tconst, primaryTitle, localTitle, startYear, averageRating, numVotes, runtime, genres, director "
+        "SELECT tconst, primaryTitle, localTitle, startYear, averageRating, numVotes, runtime, genres, director, poster "
         "FROM movies "
         "WHERE decade = ? AND numVotes >= ? AND averageRating IS NOT NULL "
-        "ORDER BY numVotes DESC LIMIT ?",
+        "ORDER BY averageRating DESC, numVotes DESC LIMIT ?",
         (decade, MIN_VOTES, TOP_N)
     ).fetchall()
 
@@ -101,7 +101,7 @@ def api_film(decade, tconst):
     decade_int(decade)
     conn = get_db()
     row = conn.execute(
-        "SELECT tconst, primaryTitle, localTitle, startYear, averageRating, numVotes, runtime, genres, director "
+        "SELECT tconst, primaryTitle, localTitle, startYear, averageRating, numVotes, runtime, genres, director, poster "
         "FROM movies WHERE tconst = ?", (tconst,)
     ).fetchone()
     conn.close()

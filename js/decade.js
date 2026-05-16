@@ -349,6 +349,21 @@ function renderFilmDetail() {
     `<span class="detail-rating-stack"><strong>${formatNumber(film.rating)}</strong><small>/10 · ${formatVotes(film.votes)} IMDb votes</small></span>` +
     `<span class="detail-meta-line">${film.director || "Unknown director"} · ${film.runtime ? film.runtime + " min" : "runtime N/A"}</span>`;
 
+  // Poster: rimuovi quello precedente sempre
+  const oldPoster = nodes.detailCard.querySelector(".detail-card__poster");
+  if (oldPoster) oldPoster.remove();
+
+  if (film.poster) {
+    const img = document.createElement("img");
+    img.src       = film.poster;
+    img.alt       = film.title;
+    img.className = "detail-card__poster";
+    nodes.detailCard.prepend(img);
+    nodes.detailCard.classList.add("has-poster");
+  } else {
+    nodes.detailCard.classList.remove("has-poster");
+  }
+
   // Summary sempre nascosta
   if (nodes.detailSummary) nodes.detailSummary.style.display = "none";
 
