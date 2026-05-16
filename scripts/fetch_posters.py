@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
 """
 fetch_posters.py
-----------------
-Recupera i poster TMDb SOLO per i top 20 film per decade.
-Massimo 260 chiamate API in totale.
-
-Usage:
-  python scripts/fetch_posters.py --key TUA_API_KEY_TMDB
+Recupera i poster TMDb solo per i top 20 film per decade.
+Usage: python scripts/fetch_posters.py --key TUA_API_KEY
 """
 
 import argparse, sqlite3, time, os
@@ -19,10 +15,9 @@ except ImportError:
 
 TMDB_BASE   = "https://api.themoviedb.org/3"
 POSTER_BASE = "https://image.tmdb.org/t/p/w500"
-DB_DEFAULT  = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-              "..", "data", "processed", "imdb.db")
+DB_DEFAULT  = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "processed", "imdb.db")
 
-DECADES = [1900,1910,1920,1930,1940,1950,1960,1970,1980,1990,2000,2010,2020]
+DECADES   = [1900,1910,1920,1930,1940,1950,1960,1970,1980,1990,2000,2010,2020]
 MIN_VOTES = 500
 TOP_N     = 20
 
@@ -31,8 +26,7 @@ def parse_args():
     p.add_argument("--key",   required=True, help="TMDb API key")
     p.add_argument("--db",    default=DB_DEFAULT)
     p.add_argument("--delay", type=float, default=0.25)
-    p.add_argument("--reset", action="store_true",
-                   help="Riscarica anche i poster già presenti")
+    p.add_argument("--reset", action="store_true", help="Riscarica anche i poster già presenti")
     return p.parse_args()
 
 def ensure_poster_column(conn):
@@ -40,21 +34,20 @@ def ensure_poster_column(conn):
     if "poster" not in cols:
         conn.execute("ALTER TABLE movies ADD COLUMN poster TEXT")
         conn.commit()
-        print("✓ Colonna 'poster' aggiunta")
+        print("Colonna poster aggiunta")
 
 def get_top20_tconsts(conn):
-    """Restituisce i tconst dei top-20 per ogni decade (ordine numVotes DESC)."""
-    tconsts = []
+    result = []
     for decade in DECADES:
-        rows = conn.execute(
+        sql = (
             "SELECT tconst, primaryTitle, poster FROM movies "
-            "WHERE decade=? AND numVotes>=? AND averageRating IS NOT NULL "
-            "ORDER BY numVotes DESC LIMIT ?",
-            (decade, MIN_VOTES, TOP_N)
-        ).fetchall()
+            "WHERE decade = ? AND numVotes >= ? AND averageRating IS NOT NULL "
+            "ORDER BY averageRating DESC, numVotes DESC LIMIT ?"
+        )
+        rows = conn.execute(sql, (decade, MIN_VOTES, TOP_N)).fetchall()
         for r in rows:
-            tconsts.append((r[0], r[1], r[2], decade))
-    return tconsts
+            result.append((r[0], r[1], r[2], decade))
+    return result
 
 def fetch_poster(tconst, api_key, session):
     try:
@@ -66,7 +59,7 @@ def fetch_poster(tconst, api_key, session):
         resp.raise_for_status()
         data = resp.json()
     except requests.RequestException as e:
-        print(f"    ⚠ Errore rete: {e}")
+        print(f"    Errore rete: {e}")
         return None
 
     for key in ("movie_results", "tv_results", "tv_episode_results"):
@@ -76,8 +69,8 @@ def fetch_poster(tconst, api_key, session):
     return None
 
 def main():
-    args  = parse_args()
-    conn  = sqlite3.connect(args.db)
+    args = parse_args()
+    conn = sqlite3.connect(args.db)
     conn.row_factory = sqlite3.Row
     ensure_poster_column(conn)
 
@@ -85,20 +78,20 @@ def main():
     if not args.reset:
         films = [(t, title, poster, d) for t, title, poster, d in films if not poster]
 
-    print(f"→ Film da processare: {len(films)} (su un massimo di {len(DECADES)*TOP_N})\n")
+    print(f"Film da processare: {len(films)}\n")
 
     session = requests.Session()
     found = missing = 0
 
     for i, (tconst, title, _, decade) in enumerate(films, 1):
-        poster_url = fetch_poster(tconst, args.api_key if hasattr(args, 'api_key') else args.key, session)
-        if poster_url:
-            conn.execute("UPDATE movies SET poster=? WHERE tconst=?", (poster_url, tconst))
+        url = fetch_poster(tconst, args.key, session)
+        if url:
+            conn.execute("UPDATE movies SET poster = ? WHERE tconst = ?", (url, tconst))
             found += 1
-            status = "✓"
+            status = "OK"
         else:
             missing += 1
-            status = "–"
+            status = "--"
 
         if i % 20 == 0:
             conn.commit()
@@ -108,7 +101,7 @@ def main():
 
     conn.commit()
     conn.close()
-    print(f"\n✓ Fatto — trovati: {found}, non trovati: {missing}")
+    print(f"\nFatto — trovati: {found}, non trovati: {missing}")
 
 if __name__ == "__main__":
     main()
