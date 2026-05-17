@@ -43,7 +43,7 @@ a { color: inherit; }
   height: 56px;
   display: flex; align-items: center; justify-content: space-between; gap: 18px;
   padding: 0 24px;
-  background: linear-gradient(to bottom, rgba(5, 5, 15, 0.98) 0%, transparent 100%);
+  background: rgba(5, 5, 15, 0.98);
   border-bottom: 1px solid var(--border);
 }
 
@@ -262,6 +262,12 @@ a { color: inherit; }
 }
 
 /* ── Slope SVG ── */
+
+/* ── Slope graph circles — colori espliciti ── */
+.slope-svg circle { opacity: 1; }
+.slope-svg text   { opacity: 1; }
+.slope-svg line   { opacity: 1; }
+
 .slope-svg {
   width: 100%; height: auto;
   margin-top: 24px;

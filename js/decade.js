@@ -1,3 +1,34 @@
+// Colori fissi per genere — consistenti in tutte le pagine e visualizzazioni
+const GENRE_COLORS = {
+  "Drama":       "#7b9fd4",
+  "Comedy":      "#d9825b",
+  "Action":      "#d4a84b",
+  "Adventure":   "#6daa8f",
+  "Crime":       "#c17fa0",
+  "Thriller":    "#9b7fc4",
+  "Romance":     "#d47b7b",
+  "Horror":      "#888888",
+  "Sci-Fi":      "#5bb8d4",
+  "Animation":   "#e8c44a",
+  "History":     "#a08050",
+  "War":         "#708060",
+  "Biography":   "#c4a46b",
+  "Music":       "#8fb0d8",
+  "Mystery":     "#9d7ec4",
+  "Fantasy":     "#7bc4a0",
+  "Family":      "#d4c04b",
+  "Sport":       "#6db87b",
+  "Western":     "#c49060",
+  "Documentary": "#78a8b8",
+  "Short":       "#a0a0a0",
+  "Musical":     "#d48fb0",
+  "Other":       "#606060",
+};
+
+function getGenreColor(genre) {
+  return GENRE_COLORS[genre] || "#888888";
+}
+
 const decadeLabel = document.body.dataset.decade;
 let selectedFilm = null;
 let decade = null;
@@ -249,15 +280,14 @@ function describeArc(cx, cy, r, s, e) {
 }
 
 function renderGenreDonut(film) {
-  const palette  = ["var(--page-accent)", "#d9825b", "#c3a655", "#7ca09b", "#7f6db0", "#4f6272"];
   const topStats = decade.genreStats.slice(0, 5);
   const total    = topStats.reduce((s, e) => s + e.count, 0) || 1;
   const filmGenres = film.genres || [];
 
   let angle = 0;
-  const segments = topStats.map((entry, i) => {
+  const segments = topStats.map((entry) => {
     const sweep = (entry.count / total) * 360;
-    const seg   = { genre: entry.genre, count: entry.count, color: palette[i % palette.length], path: describeArc(90, 90, 62, angle, angle + sweep) };
+    const seg   = { genre: entry.genre, count: entry.count, color: getGenreColor(entry.genre), path: describeArc(90, 90, 62, angle, angle + sweep) };
     angle += sweep;
     return seg;
   });
@@ -301,7 +331,16 @@ function renderScatterPlot(film) {
   const gridLines  = [6,7,8,9,10].map((t) => `<line x1="${m.left}" y1="${y(t)}" x2="${w-m.right}" y2="${y(t)}" class="chart-grid"></line>`).join("");
   const tickLabels = [6,7,8,9,10].map((t) => `<text x="${m.left-12}" y="${y(t)+4}" class="chart-tick">${t.toFixed(1)}</text>`).join("");
   const rtTicks    = [minR, Math.round((minR+maxR)/2), maxR].map((t) => `<text x="${x(t)}" y="${h-10}" text-anchor="middle" class="chart-tick">${t}</text>`).join("");
-  const points     = withRuntime.map((f) => `<circle cx="${x(f.runtime)}" cy="${y(f.rating)}" r="${f.rank === film.rank ? 7 : 4.5}" class="${f.rank === film.rank ? "chart-point chart-point--active" : "chart-point"}"></circle>`).join("");
+  const points = withRuntime.map((f) => 
+    `<circle 
+      cx="${x(f.runtime)}" cy="${y(f.rating)}" 
+      r="${f.rank === film.rank ? 7 : 4.5}" 
+      class="${f.rank === film.rank ? "chart-point chart-point--active" : "chart-point"}"
+      data-rank="${f.rank}"
+      style="cursor:pointer"
+      title="${f.title} (${f.year}) — ${formatNumber(f.rating)}/10">
+    </circle>`
+  ).join("");
 
   chartNodes.scatterPlot.innerHTML = `
     <line x1="${m.left}" y1="${m.top}" x2="${m.left}" y2="${h-m.bottom}" class="chart-axis"></line>
@@ -310,6 +349,22 @@ function renderScatterPlot(film) {
     <text x="${w/2}" y="${h-4}" text-anchor="middle" class="chart-label">Runtime (minutes)</text>
     <text x="16" y="${h/2}" text-anchor="middle" class="chart-label" transform="rotate(-90 16 ${h/2})">IMDb rating</text>
   `;
+
+  // Click interattivo: seleziona il film cliccato
+  chartNodes.scatterPlot.querySelectorAll("circle[data-rank]").forEach((circle) => {
+    circle.addEventListener("click", () => {
+      const rank = parseInt(circle.dataset.rank, 10);
+      const clicked = decade.films.find((f) => f.rank === rank);
+      if (clicked) {
+        selectedFilm = clicked;
+        renderFilmList();
+        renderFilmDetail();
+        // Scrolla in cima alla colonna sinistra
+        const leftCol = document.querySelector(".left-column");
+        if (leftCol) leftCol.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    });
+  });
 }
 
 function renderDistribution(film) {

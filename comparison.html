@@ -11,6 +11,7 @@
 </head>
 <body>
   <div class="page-shell">
+
     <header class="topbar">
       <a class="topbar__brand" href="index.html">Cinema through the decades</a>
       <div class="topbar__center">
@@ -26,7 +27,6 @@
         <h1>How one film behaves against the decade baseline.</h1>
         <p id="comparisonSubtitle"></p>
       </div>
-
       <div class="hero-cards">
         <article class="hero-card hero-card--film">
           <span>Selected film</span>
@@ -42,10 +42,17 @@
     </section>
 
     <main class="comparison-grid">
+
       <section class="panel">
         <p class="eyebrow">Quick read</p>
         <h2>Key metrics</h2>
         <div class="metric-grid" id="metricGrid"></div>
+      </section>
+
+      <section class="panel">
+        <p class="eyebrow">Bullet chart</p>
+        <h2>Film position within the decade range</h2>
+        <div id="bulletChart"></div>
       </section>
 
       <section class="panel">
@@ -67,12 +74,6 @@
         <p class="panel-copy" id="placementSummary"></p>
       </section>
 
-      <section class="panel">
-        <p class="eyebrow">Slope graph</p>
-        <h2>Normalized film vs decade profile</h2>
-        <svg class="slope-svg" id="slopeChart" viewBox="0 0 560 260" role="img" aria-label="Slope graph comparing normalized metrics"></svg>
-      </section>
-
       <section class="panel panel--wide">
         <p class="eyebrow">Interpretation</p>
         <h2>What the numbers suggest</h2>
@@ -80,6 +81,7 @@
         <p class="panel-copy" id="takeawaySupport"></p>
         <a class="primary-link" data-back-link href="index.html">Return to decade page</a>
       </section>
+
     </main>
   </div>
 
