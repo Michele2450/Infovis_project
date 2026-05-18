@@ -65,13 +65,12 @@ const nodes = {
 let chartNodes = null;
 let compareButtonNode = null;
 
-// Nascondi subito gli elementi che non vogliamo mostrare
 if (nodes.detailSummary) nodes.detailSummary.style.display = "none";
 
 function renderHeader() {
   document.documentElement.style.setProperty("--page-accent", decade.meta.accent);
   document.title = `${decade.label} · Cinema by Decade`;
-  if (nodes.navTitle) nodes.navTitle.textContent = decade.label;
+  if (nodes.navTitle) nodes.navTitle.textContent = `${decade.label} · ${decade.meta.theme}`;
   nodes.decadeTitle.textContent  = decade.label;
   nodes.decadeTheme.textContent  = decade.meta.theme;
   nodes.decadeBlurb.textContent  = decade.meta.blurb;
@@ -88,23 +87,11 @@ function renderHeader() {
   const prev = getPreviousDecade(decade.label);
   const next = getNextDecade(decade.label);
 
-  if (prev) {
-    nodes.prevLink.href        = `${prev}.html`;
-    nodes.prevLink.textContent = `← ${prev}`;
-  } else {
-    nodes.prevLink.removeAttribute("href");
-    nodes.prevLink.textContent = "← First decade";
-    nodes.prevLink.classList.add("is-disabled");
-  }
+  if (prev) { nodes.prevLink.href = `${prev}.html`; nodes.prevLink.textContent = `← ${prev}`; }
+  else { nodes.prevLink.removeAttribute("href"); nodes.prevLink.textContent = "← First decade"; nodes.prevLink.classList.add("is-disabled"); }
 
-  if (next) {
-    nodes.nextLink.href        = `${next}.html`;
-    nodes.nextLink.textContent = `${next} →`;
-  } else {
-    nodes.nextLink.removeAttribute("href");
-    nodes.nextLink.textContent = "Latest decade →";
-    nodes.nextLink.classList.add("is-disabled");
-  }
+  if (next) { nodes.nextLink.href = `${next}.html`; nodes.nextLink.textContent = `${next} →`; }
+  else { nodes.nextLink.removeAttribute("href"); nodes.nextLink.textContent = "Latest decade →"; nodes.nextLink.classList.add("is-disabled"); }
 }
 
 function renderGenreOverview() {
@@ -128,16 +115,13 @@ function renderGenreOverview() {
 
 function renderFilmList() {
   nodes.filmList.innerHTML = "";
-  // Ordina per rating decrescente
   const sorted = [...decade.films].sort((a, b) => b.rating - a.rating || a.rank - b.rank);
   sorted.forEach((film, idx) => {
     const item = document.createElement("button");
     item.type      = "button";
     item.className = `film-list__item${selectedFilm && selectedFilm.rank === film.rank ? " active" : ""}`;
-
     const maxLen       = 26;
     const displayTitle = film.title.length > maxLen ? film.title.slice(0, maxLen) + "…" : film.title;
-
     item.innerHTML = `
       <span class="film-list__rank">#${idx + 1}</span>
       <span class="film-list__body">
@@ -162,9 +146,9 @@ function renderFilmStats(film) {
 
   const stats = [
     { label: "IMDb rating",        value: `${formatNumber(film.rating)}/10`,            note: `${formatNumber(film.rating - decade.avgRating, 1)} vs avg` },
-    { label: "Votes",              value: formatVotes(film.votes),                       note: votePercentile    ? `popularity rank ${votePercentile.rank}/${votePercentile.total}`       : "—" },
+    { label: "Votes",              value: formatVotes(film.votes),                       note: votePercentile    ? `popularity rank ${votePercentile.rank}/${votePercentile.total}`   : "—" },
     { label: "Runtime",            value: film.runtime ? `${film.runtime} min` : "N/A", note: runtimePercentile ? `length rank ${runtimePercentile.rank}/${runtimePercentile.total}` : "—" },
-    { label: "Position in decade", value: `#${film.rank}`,                               note: ratingPercentile  ? `top ${ratingPercentile.percentile}% by rating`                       : "—" },
+    { label: "Position in decade", value: `#${film.rank}`,                               note: ratingPercentile  ? `top ${ratingPercentile.percentile}% by rating`                   : "—" },
   ];
 
   nodes.detailStats.innerHTML = "";
@@ -241,7 +225,7 @@ function ensureExtraCharts() {
     <p class="eyebrow">Scatter plot</p>
     <h3 class="panel-title">Runtime vs IMDb rating</h3>
     <div class="chart-frame">
-      <svg class="scatter-svg" id="scatterPlot" viewBox="0 0 560 280" role="img"></svg>
+      <svg class="scatter-svg" id="scatterPlot" viewBox="0 0 560 300" role="img"></svg>
     </div>
   `;
 
@@ -280,8 +264,8 @@ function describeArc(cx, cy, r, s, e) {
 }
 
 function renderGenreDonut(film) {
-  const topStats = decade.genreStats.slice(0, 5);
-  const total    = topStats.reduce((s, e) => s + e.count, 0) || 1;
+  const topStats   = decade.genreStats.slice(0, 5);
+  const total      = topStats.reduce((s, e) => s + e.count, 0) || 1;
   const filmGenres = film.genres || [];
 
   let angle = 0;
@@ -312,57 +296,82 @@ function renderGenreDonut(film) {
 }
 
 function renderScatterPlot(film) {
-  const w = 560, h = 280;
-  const m = { top: 24, right: 18, bottom: 38, left: 48 };
+  const w = 560, h = 300;
+  const m = { top: 30, right: 24, bottom: 44, left: 52 };
   const withRuntime = decade.films.filter((f) => f.runtime);
 
   if (!withRuntime.length) {
-    chartNodes.scatterPlot.innerHTML = `<text x="280" y="140" text-anchor="middle" class="chart-label" style="fill:var(--gold-dim)">No runtime data available</text>`;
+    chartNodes.scatterPlot.innerHTML = `<text x="280" y="150" text-anchor="middle" style="fill:rgba(232,213,163,0.4);font-size:13px">No runtime data available</text>`;
     return;
   }
 
-  const minR = Math.min(...withRuntime.map((f) => f.runtime));
-  const maxR = Math.max(...withRuntime.map((f) => f.runtime));
-  const pw   = w - m.left - m.right;
-  const ph   = h - m.top  - m.bottom;
-  const x    = (rt)   => m.left + ((rt - minR) / Math.max(1, maxR - minR)) * pw;
-  const y    = (rate) => m.top  + (1 - rate / 10) * ph;
+  // Assi fissi: rating 0-10, runtime 0-max arrotondato a 30min
+  const ratingMax  = 10;
+  const runtimeMax = Math.ceil(Math.max(...withRuntime.map(f => f.runtime)) / 30) * 30;
 
-  const gridLines  = [6,7,8,9,10].map((t) => `<line x1="${m.left}" y1="${y(t)}" x2="${w-m.right}" y2="${y(t)}" class="chart-grid"></line>`).join("");
-  const tickLabels = [6,7,8,9,10].map((t) => `<text x="${m.left-12}" y="${y(t)+4}" class="chart-tick">${t.toFixed(1)}</text>`).join("");
-  const rtTicks    = [minR, Math.round((minR+maxR)/2), maxR].map((t) => `<text x="${x(t)}" y="${h-10}" text-anchor="middle" class="chart-tick">${t}</text>`).join("");
-  const points = withRuntime.map((f) => 
-    `<circle 
-      cx="${x(f.runtime)}" cy="${y(f.rating)}" 
-      r="${f.rank === film.rank ? 7 : 4.5}" 
-      class="${f.rank === film.rank ? "chart-point chart-point--active" : "chart-point"}"
-      data-rank="${f.rank}"
-      style="cursor:pointer"
+  const pw = w - m.left - m.right;
+  const ph = h - m.top  - m.bottom;
+  const x  = rt   => m.left + (rt   / runtimeMax) * pw;
+  const y  = rate => m.top  + (1 - rate / ratingMax) * ph;
+
+  // Grid orizzontale
+  const hGrid = [2, 4, 6, 8, 10].map(t => `
+    <line x1="${m.left}" y1="${y(t).toFixed(1)}" x2="${w-m.right}" y2="${y(t).toFixed(1)}" stroke="rgba(232,213,163,0.1)" stroke-dasharray="3 5"></line>
+    <text x="${m.left-8}" y="${y(t)+4}" text-anchor="end" style="fill:rgba(232,213,163,0.55);font-size:11px">${t}</text>
+  `).join("");
+
+  // Grid verticale
+  const rtStep = runtimeMax <= 120 ? 30 : runtimeMax <= 210 ? 60 : 90;
+  const vTicks = [];
+  for (let t = 0; t <= runtimeMax; t += rtStep) vTicks.push(t);
+  const vGrid = vTicks.map(t => `
+    <line x1="${x(t).toFixed(1)}" y1="${m.top}" x2="${x(t).toFixed(1)}" y2="${h-m.bottom}" stroke="rgba(232,213,163,0.07)" stroke-dasharray="3 5"></line>
+    <text x="${x(t).toFixed(1)}" y="${h-m.bottom+14}" text-anchor="middle" style="fill:rgba(232,213,163,0.45);font-size:11px">${t}</text>
+  `).join("");
+
+  // Punti colorati per genere
+  const points = withRuntime.map(f => {
+    const isActive = f.rank === film.rank;
+    const genre    = (f.genres && f.genres[0]) ? f.genres[0] : "Other";
+    const color    = isActive ? "#d4a84b" : getGenreColor(genre);
+    const r        = isActive ? 9 : 6;
+    const opacity  = isActive ? 1 : 0.75;
+    const stroke   = isActive ? "rgba(232,213,163,0.7)" : "rgba(0,0,0,0.3)";
+    return `<circle cx="${x(f.runtime).toFixed(1)}" cy="${y(f.rating).toFixed(1)}"
+      r="${r}" data-rank="${f.rank}" style="fill:${color};opacity:${opacity};cursor:pointer;stroke:${stroke};stroke-width:1.5"
       title="${f.title} (${f.year}) — ${formatNumber(f.rating)}/10">
-    </circle>`
-  ).join("");
+    </circle>`;
+  }).join("");
 
+  chartNodes.scatterPlot.setAttribute("viewBox", `0 0 ${w} ${h}`);
   chartNodes.scatterPlot.innerHTML = `
-    <line x1="${m.left}" y1="${m.top}" x2="${m.left}" y2="${h-m.bottom}" class="chart-axis"></line>
-    <line x1="${m.left}" y1="${h-m.bottom}" x2="${w-m.right}" y2="${h-m.bottom}" class="chart-axis"></line>
-    ${gridLines}${tickLabels}${rtTicks}${points}
-    <text x="${w/2}" y="${h-4}" text-anchor="middle" class="chart-label">Runtime (minutes)</text>
-    <text x="16" y="${h/2}" text-anchor="middle" class="chart-label" transform="rotate(-90 16 ${h/2})">IMDb rating</text>
+    <rect x="${m.left}" y="${m.top}" width="${pw}" height="${ph}" style="fill:rgba(232,213,163,0.02);stroke:rgba(232,213,163,0.15);stroke-width:1"></rect>
+    ${hGrid}${vGrid}
+    <line x1="${m.left}" y1="${m.top}" x2="${m.left}" y2="${h-m.bottom}" style="stroke:rgba(232,213,163,0.35);stroke-width:1"></line>
+    <line x1="${m.left}" y1="${h-m.bottom}" x2="${w-m.right}" y2="${h-m.bottom}" style="stroke:rgba(232,213,163,0.35);stroke-width:1"></line>
+    ${points}
+    <text x="${m.left + pw/2}" y="${h-4}" text-anchor="middle" style="fill:rgba(232,213,163,0.5);font-size:12px">Runtime (minutes)</text>
+    <text x="14" y="${m.top + ph/2}" text-anchor="middle" style="fill:rgba(232,213,163,0.5);font-size:12px" transform="rotate(-90 14 ${m.top + ph/2})">IMDb rating</text>
   `;
 
-  // Click interattivo: seleziona il film cliccato
+  // Click e hover
   chartNodes.scatterPlot.querySelectorAll("circle[data-rank]").forEach((circle) => {
     circle.addEventListener("click", () => {
-      const rank = parseInt(circle.dataset.rank, 10);
-      const clicked = decade.films.find((f) => f.rank === rank);
+      const clicked = decade.films.find(f => f.rank === parseInt(circle.dataset.rank, 10));
       if (clicked) {
         selectedFilm = clicked;
         renderFilmList();
         renderFilmDetail();
-        // Scrolla in cima alla colonna sinistra
         const leftCol = document.querySelector(".left-column");
         if (leftCol) leftCol.scrollTo({ top: 0, behavior: "smooth" });
       }
+    });
+    circle.addEventListener("mouseenter", () => {
+      circle.setAttribute("r", String(parseInt(circle.getAttribute("r")) + 2));
+    });
+    circle.addEventListener("mouseleave", () => {
+      const isActive = parseInt(circle.dataset.rank) === film.rank;
+      circle.setAttribute("r", isActive ? "9" : "6");
     });
   });
 }
@@ -398,31 +407,25 @@ function renderFilmDetail() {
   if (!film) return;
 
   nodes.detailTitle.textContent = film.title;
-
   nodes.detailMeta.innerHTML =
     `<span class="detail-year-badge">${film.year}</span>` +
     `<span class="detail-rating-stack"><strong>${formatNumber(film.rating)}</strong><small>/10 · ${formatVotes(film.votes)} IMDb votes</small></span>` +
     `<span class="detail-meta-line">${film.director || "Unknown director"} · ${film.runtime ? film.runtime + " min" : "runtime N/A"}</span>`;
 
-  // Poster: rimuovi quello precedente sempre
   const oldPoster = nodes.detailCard.querySelector(".detail-card__poster");
   if (oldPoster) oldPoster.remove();
 
   if (film.poster) {
     const img = document.createElement("img");
-    img.src       = film.poster;
-    img.alt       = film.title;
-    img.className = "detail-card__poster";
+    img.src = film.poster; img.alt = film.title; img.className = "detail-card__poster";
     nodes.detailCard.prepend(img);
     nodes.detailCard.classList.add("has-poster");
   } else {
     nodes.detailCard.classList.remove("has-poster");
   }
 
-  // Summary sempre nascosta
   if (nodes.detailSummary) nodes.detailSummary.style.display = "none";
 
-  // Genres: mostra solo se presenti
   if (nodes.detailGenres) {
     const genres = film.genres || [];
     if (genres.length > 0) {
@@ -439,12 +442,8 @@ function renderFilmDetail() {
   renderScatterPlot(film);
   renderDistribution(film);
 
-  if (compareButtonNode) {
-    compareButtonNode.sub.textContent = `"${film.title}" vs. avg of the ${decade.label}`;
-  }
-  if (nodes.compareLink) {
-    nodes.compareLink.href = `comparison.html?decade=${decade.label}&rank=${film.rank}`;
-  }
+  if (compareButtonNode) compareButtonNode.sub.textContent = `"${film.title}" vs. avg of the ${decade.label}`;
+  if (nodes.compareLink) nodes.compareLink.href = `comparison.html?decade=${decade.label}&rank=${film.rank}`;
 }
 
 // ─── ENTRY POINT ──────────────────────────────────────────────────────────────
