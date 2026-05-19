@@ -22,6 +22,7 @@ let wheelAccum = 0;
 const trackEl = document.getElementById("track");
 const dotsEl = document.getElementById("dots");
 const ctaBtn = document.getElementById("ctaBtn");
+const analysisBtn = document.getElementById("analysisBtn");
 const overlay = document.getElementById("overlay");
 
 function starSVG(fill, active) {
@@ -35,6 +36,11 @@ function starSVG(fill, active) {
 function navigate(i) {
   overlay.classList.add("active");
   setTimeout(() => { window.location.href = `${DECADES[i].slug}.html`; }, 450);
+}
+
+function navigateTo(url) {
+  overlay.classList.add("active");
+  setTimeout(() => { window.location.href = url; }, 450);
 }
 
 function render() {
@@ -74,12 +80,23 @@ function render() {
 
   ctaBtn.href = `${DECADES[current].slug}.html`;
   ctaBtn.classList.add("visible");
+  if (analysisBtn) {
+    analysisBtn.href = `decade_analysis.html?decade=${DECADES[current].slug}&rank=1`;
+    analysisBtn.classList.add("visible");
+  }
 }
 
 ctaBtn.addEventListener("click", (e) => {
   e.preventDefault();
   navigate(current);
 });
+
+if (analysisBtn) {
+  analysisBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    navigateTo(`decade_analysis.html?decade=${DECADES[current].slug}&rank=1`);
+  });
+}
 
 document.addEventListener("wheel", (e) => {
   e.preventDefault();

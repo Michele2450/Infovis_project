@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>Decade Analysis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/decade_analysis.css" />
+</head>
+
+<body>
+
+  <div class="rail"></div>
+
+  <div class="spot spot-l"></div>
+  <div class="spot spot-c"></div>
+  <div class="spot spot-r"></div>
+
+  <div class="curtain curtain-l"></div>
+  <div class="curtain curtain-r"></div>
+
+  <div class="floor"></div>
+
+  <a href="index.html" class="back-btn">← Back</a>
+
+  <main class="analysis-page">
+
+    <section class="viz-card">
+      <div class="viz-header">
+        <span class="viz-number">1</span>
+
+        <div>
+          <h2>Genres Across Decades</h2>
+          <p>
+            Discover the evolution of film genres and their prevalence by decade.
+          </p>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <div id="heatmapChart" class="heatmap-chart"></div>
+        <div id="heatmapTooltip" class="heatmap-tooltip" hidden></div>
+        <div class="scale-legend">
+          <span>Low prevalence</span>
+          <div id="heatmapLegendBar" class="scale-legend__bar"></div>
+          <span>High prevalence</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISUALIZATION 2 -->
+    <section class="viz-card">
+      <div class="viz-header">
+        <span class="viz-number">2</span>
+
+        <div>
+          <h2>Filter By Genre</h2>
+          <p>
+            Use genre filters to dynamically update all visualizations.
+          </p>
+        </div>
+      </div>
+
+      <div id="genreFilters" class="genre-filters"></div>
+      <div class="chart-wrap">
+        <div id="lineChart" class="line-chart"></div>
+      </div>
+    </section>
+
+    <!-- VISUALIZATION 3 -->
+    <section class="viz-card">
+      <div class="viz-header">
+        <span class="viz-number">3</span>
+
+        <div>
+          <h2>Popularity, Rating and Runtime</h2>
+          <p>
+            Bubble size = votes · Color = decade
+          </p>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <div id="bubbleChart" class="bubble-chart"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="js/data/all_decades.js"></script>
+  <script src="js/catalog.js"></script>
+  <script src="js/decade_analysis.js"></script>
+
+</body>
+</html>

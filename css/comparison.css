@@ -116,6 +116,41 @@ a { color: inherit; }
 .hero-card strong { display: block; margin-top: 8px; font-size: 28px; }
 .hero-card small { display: block; margin-top: 6px; color: var(--gold-dim); font-size: 13px; }
 
+.comparison-select-wrap {
+  display: block;
+  margin-top: 10px;
+}
+
+.comparison-select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--border-hover);
+  background: rgba(232, 213, 163, 0.05);
+  color: var(--gold);
+  padding: 8px 10px;
+  font-family: "Playfair Display", serif;
+  font-size: 20px;
+}
+
+.comparison-select--small {
+  min-height: 32px;
+  font-size: 16px;
+  margin-top: 4px;
+}
+
+.comparison-inline {
+  margin-top: 10px;
+  display: block;
+}
+
+.comparison-inline > span {
+  display: block;
+  color: rgba(232, 213, 163, 0.75);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
 .comparison-grid { display: grid; gap: 28px; }
 
 .panel { border-top: 1px solid var(--border); padding-top: 26px; }

@@ -64,6 +64,7 @@ const nodes = {
 
 let chartNodes = null;
 let compareButtonNode = null;
+let activeBrowserGenres = new Set(["All Genres"]);
 
 if (nodes.detailSummary) nodes.detailSummary.style.display = "none";
 
@@ -225,6 +226,7 @@ function ensureExtraCharts() {
     <p class="eyebrow">Scatter plot</p>
     <h3 class="panel-title">Runtime vs IMDb rating</h3>
     <div class="chart-frame">
+      <div class="scatter-tooltip" id="scatterTooltip" hidden></div>
       <svg class="scatter-svg" id="scatterPlot" viewBox="0 0 560 300" role="img"></svg>
     </div>
   `;
@@ -238,18 +240,72 @@ function ensureExtraCharts() {
     <p class="ranking-caption" id="distributionCaption"></p>
   `;
 
+  const browserCard = document.createElement("section");
+  browserCard.className = "viz-card";
+  browserCard.innerHTML = `
+    <p class="eyebrow">Genre browser</p>
+    <h3>Browse top films by genre</h3>
+    <div class="genre-browser">
+      <div class="genre-browser__filters" id="genreBrowserFilters"></div>
+      <div class="genre-browser__grid" id="genreBrowserGrid"></div>
+    </div>
+  `;
+
+  const similarCard = document.createElement("section");
+  similarCard.className = "viz-card";
+  similarCard.innerHTML = `
+    <p class="eyebrow">Similarity</p>
+    <h3>Most similar films in the decade</h3>
+    <div class="similar-showcase" id="similarShowcase"></div>
+  `;
+
   if (nodes.insightCard) nodes.leftColumn.appendChild(nodes.insightCard);
   nodes.leftColumn.appendChild(donutCard);
   nodes.leftColumn.appendChild(scatterCard);
   nodes.leftColumn.appendChild(distCard);
+  nodes.leftColumn.appendChild(browserCard);
+  nodes.leftColumn.appendChild(similarCard);
 
   chartNodes = {
     donutChart:          document.getElementById("genreDonutChart"),
     donutLegend:         document.getElementById("genreDonutLegend"),
     scatterPlot:         document.getElementById("scatterPlot"),
+    scatterTooltip:      document.getElementById("scatterTooltip"),
     distributionBars:    document.getElementById("distributionBars"),
     distributionCaption: document.getElementById("distributionCaption"),
+    genreBrowserFilters: document.getElementById("genreBrowserFilters"),
+    genreBrowserGrid:    document.getElementById("genreBrowserGrid"),
+    similarShowcase:     document.getElementById("similarShowcase"),
   };
+}
+
+function getSharedGenreCount(a, b) {
+  return (a.genres || []).filter((genre) => (b.genres || []).includes(genre)).length;
+}
+
+function getMostSimilarFilms(film) {
+  const candidates = decade.films.filter((candidate) => candidate.rank !== film.rank);
+
+  const byRating = [...candidates]
+    .sort((a, b) =>
+      Math.abs(a.rating - film.rating) - Math.abs(b.rating - film.rating) ||
+      a.rank - b.rank
+    )[0] || null;
+
+  const byRuntime = [...candidates]
+    .sort((a, b) =>
+      Math.abs((a.runtime || 0) - (film.runtime || 0)) - Math.abs((b.runtime || 0) - (film.runtime || 0)) ||
+      a.rank - b.rank
+    )[0] || null;
+
+  const byGenre = [...candidates]
+    .sort((a, b) =>
+      getSharedGenreCount(b, film) - getSharedGenreCount(a, film) ||
+      Math.abs(a.rating - film.rating) - Math.abs(b.rating - film.rating) ||
+      a.rank - b.rank
+    )[0] || null;
+
+  return { byRating, byRuntime, byGenre };
 }
 
 function polarToCartesian(cx, cy, r, angle) {
@@ -277,9 +333,21 @@ function renderGenreDonut(film) {
   });
 
   chartNodes.donutChart.innerHTML = `
+    <div class="donut-tooltip" id="genreDonutTooltip" hidden></div>
     <svg viewBox="0 0 180 180" role="img">
       <circle cx="90" cy="90" r="62" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="24"></circle>
-      ${segments.map((s) => `<path d="${s.path}" fill="none" stroke="${s.color}" stroke-width="24" stroke-linecap="butt"></path>`).join("")}
+      ${segments.map((s) => `
+        <path
+          class="donut-segment"
+          d="${s.path}"
+          fill="none"
+          stroke="${s.color}"
+          stroke-width="24"
+          stroke-linecap="butt"
+          data-genre="${s.genre}"
+          data-count="${s.count}">
+        </path>
+      `).join("")}
       <circle cx="90" cy="90" r="40" fill="rgba(7,12,18,0.96)"></circle>
       <text x="90" y="82"  text-anchor="middle" class="donut-value">${filmGenres.length}</text>
       <text x="90" y="102" text-anchor="middle" class="donut-label">film genres</text>
@@ -293,6 +361,27 @@ function renderGenreDonut(film) {
       <strong>${s.count}/${decade.films.length} films</strong>
     </div>
   `).join("");
+
+  const tooltip = chartNodes.donutChart.querySelector("#genreDonutTooltip");
+  chartNodes.donutChart.querySelectorAll(".donut-segment").forEach((segmentNode) => {
+    segmentNode.addEventListener("mouseenter", () => {
+      tooltip.hidden = false;
+      tooltip.textContent =
+        `${segmentNode.dataset.genre}: ${segmentNode.dataset.count}/${decade.films.length} films`;
+      segmentNode.classList.add("is-hovered");
+    });
+
+    segmentNode.addEventListener("mousemove", (event) => {
+      const bounds = chartNodes.donutChart.getBoundingClientRect();
+      tooltip.style.left = `${event.clientX - bounds.left + 12}px`;
+      tooltip.style.top = `${event.clientY - bounds.top - 12}px`;
+    });
+
+    segmentNode.addEventListener("mouseleave", () => {
+      tooltip.hidden = true;
+      segmentNode.classList.remove("is-hovered");
+    });
+  });
 }
 
 function renderScatterPlot(film) {
@@ -338,7 +427,7 @@ function renderScatterPlot(film) {
     const opacity  = isActive ? 1 : 0.75;
     const stroke   = isActive ? "rgba(232,213,163,0.7)" : "rgba(0,0,0,0.3)";
     return `<circle cx="${x(f.runtime).toFixed(1)}" cy="${y(f.rating).toFixed(1)}"
-      r="${r}" data-rank="${f.rank}" style="fill:${color};opacity:${opacity};cursor:pointer;stroke:${stroke};stroke-width:1.5"
+      r="${r}" data-rank="${f.rank}" data-title="${f.title}" data-rating="${formatNumber(f.rating)}" data-year="${f.year}" data-runtime="${f.runtime}" style="fill:${color};opacity:${opacity};cursor:pointer;stroke:${stroke};stroke-width:1.5"
       title="${f.title} (${f.year}) — ${formatNumber(f.rating)}/10">
     </circle>`;
   }).join("");
@@ -368,10 +457,26 @@ function renderScatterPlot(film) {
     });
     circle.addEventListener("mouseenter", () => {
       circle.setAttribute("r", String(parseInt(circle.getAttribute("r")) + 2));
+      if (chartNodes.scatterTooltip) {
+        chartNodes.scatterTooltip.hidden = false;
+        chartNodes.scatterTooltip.innerHTML = `
+          <strong>${circle.dataset.title}</strong><br>
+          Rating: ${circle.dataset.rating}/10<br>
+          Runtime: ${circle.dataset.runtime} min<br>
+          Year: ${circle.dataset.year}
+        `;
+      }
+    });
+    circle.addEventListener("mousemove", (event) => {
+      if (!chartNodes.scatterTooltip) return;
+      const bounds = chartNodes.scatterPlot.getBoundingClientRect();
+      chartNodes.scatterTooltip.style.left = `${event.clientX - bounds.left + 12}px`;
+      chartNodes.scatterTooltip.style.top = `${event.clientY - bounds.top - 12}px`;
     });
     circle.addEventListener("mouseleave", () => {
       const isActive = parseInt(circle.dataset.rank) === film.rank;
       circle.setAttribute("r", isActive ? "9" : "6");
+      if (chartNodes.scatterTooltip) chartNodes.scatterTooltip.hidden = true;
     });
   });
 }
@@ -400,6 +505,169 @@ function renderDistribution(film) {
 
   chartNodes.distributionCaption.textContent =
     `${film.title} falls into the ${activeBin.label} rating band, one of ${activeBin.count} films in the ${decade.label} top selection.`;
+}
+
+function renderGenreBrowser() {
+  if (!chartNodes || !chartNodes.genreBrowserFilters || !chartNodes.genreBrowserGrid) return;
+
+  const visibleGenres = decade.genreStats.slice(0, 6).map((entry) => entry.genre);
+  const hiddenGenres = decade.genreStats.slice(6).map((entry) => entry.genre);
+
+  const filterButtons = ["All Genres", ...visibleGenres];
+  const moreOptions = hiddenGenres.length
+    ? `
+      <select class="genre-browser__more" id="genreBrowserMore">
+        <option value="">More</option>
+        ${hiddenGenres.map((genre) => `<option value="${genre}">${genre}</option>`).join("")}
+      </select>
+    `
+    : "";
+
+  chartNodes.genreBrowserFilters.innerHTML = `
+    ${filterButtons.map((genre) => `
+      <button
+        type="button"
+        class="genre-browser__chip${activeBrowserGenres.has(genre) ? " active" : ""}"
+        data-genre="${genre}">
+        ${genre}
+      </button>
+    `).join("")}
+    ${moreOptions}
+  `;
+
+  chartNodes.genreBrowserFilters.querySelectorAll(".genre-browser__chip").forEach((button) => {
+    button.addEventListener("click", () => {
+      const genre = button.dataset.genre;
+      if (genre === "All Genres") {
+        activeBrowserGenres = new Set(["All Genres"]);
+      } else {
+        if (activeBrowserGenres.has("All Genres")) activeBrowserGenres.delete("All Genres");
+        if (activeBrowserGenres.has(genre)) activeBrowserGenres.delete(genre);
+        else activeBrowserGenres.add(genre);
+        if (activeBrowserGenres.size === 0) activeBrowserGenres = new Set(["All Genres"]);
+      }
+      renderGenreBrowser();
+    });
+  });
+
+  const moreSelect = chartNodes.genreBrowserFilters.querySelector("#genreBrowserMore");
+  if (moreSelect) {
+    moreSelect.addEventListener("change", (event) => {
+      if (event.target.value) {
+        if (activeBrowserGenres.has("All Genres")) activeBrowserGenres.delete("All Genres");
+        activeBrowserGenres.add(event.target.value);
+        renderGenreBrowser();
+      }
+    });
+  }
+
+  const selectedGenres = Array.from(activeBrowserGenres).filter((g) => g !== "All Genres");
+  const visibleFilms = selectedGenres.length === 0
+    ? decade.films
+    : decade.films.filter((film) =>
+      selectedGenres.every((genre) => (film.genres || []).includes(genre))
+    );
+
+  chartNodes.genreBrowserGrid.innerHTML = visibleFilms
+    .map((film) => `
+      <button
+        type="button"
+        class="genre-browser__card${selectedFilm && selectedFilm.rank === film.rank ? " active" : ""}"
+        data-rank="${film.rank}">
+        <div class="genre-browser__title">${film.title}</div>
+        <div class="genre-browser__year">${film.year}</div>
+        <div class="genre-browser__rating">★ ${formatNumber(film.rating)}</div>
+        <div class="genre-browser__runtime">${film.runtime || "N/A"}${film.runtime ? " min" : ""}</div>
+        <div class="genre-browser__genres">${(film.genres || []).slice(0, 3).join(", ")}</div>
+      </button>
+    `)
+    .join("");
+
+  chartNodes.genreBrowserGrid.querySelectorAll(".genre-browser__card").forEach((card) => {
+    card.addEventListener("click", () => {
+      const rank = Number.parseInt(card.dataset.rank, 10);
+      selectedFilm = decade.films.find((film) => film.rank === rank) || selectedFilm;
+      renderFilmList();
+      renderFilmDetail();
+      renderGenreBrowser();
+    });
+  });
+}
+
+function renderSimilarShowcase() {
+  if (!chartNodes || !chartNodes.similarShowcase || !selectedFilm) return;
+
+  const film = selectedFilm;
+  const { byRating, byRuntime, byGenre } = getMostSimilarFilms(film);
+
+  function renderPosterBlock(movie, label) {
+    if (!movie) {
+      return `
+        <article class="similar-card">
+          <div class="similar-card__label">${label}</div>
+          <div class="similar-card__empty">No match</div>
+        </article>
+      `;
+    }
+
+    const posterMarkup = movie.poster
+      ? `<img class="similar-card__poster" src="${movie.poster}" alt="${movie.title} poster">`
+      : `<div class="similar-card__poster similar-card__poster--placeholder">${movie.title}</div>`;
+
+    return `
+      <article class="similar-card" data-rank="${movie.rank}">
+        <div class="similar-card__label">${label}</div>
+        ${posterMarkup}
+        <div class="similar-card__body">
+          <strong class="similar-card__title">${movie.title}</strong>
+          <div class="similar-card__meta">${movie.year} · ${movie.runtime || "N/A"}${movie.runtime ? " min" : ""}</div>
+          <div class="similar-card__rating">★ ${formatNumber(movie.rating)}</div>
+          <button type="button" class="similar-card__button" data-rank="${movie.rank}">
+            View details
+          </button>
+        </div>
+      </article>
+    `;
+  }
+
+  const selectedPoster = film.poster
+    ? `<img class="similar-selected__poster" src="${film.poster}" alt="${film.title} poster">`
+    : `<div class="similar-selected__poster similar-selected__poster--placeholder">${film.title}</div>`;
+
+  chartNodes.similarShowcase.innerHTML = `
+    <div class="similar-layout">
+      <article class="similar-selected">
+        <div class="similar-selected__label">Selected film</div>
+        ${selectedPoster}
+        <div class="similar-selected__body">
+          <strong class="similar-selected__title">${film.title}</strong>
+          <div class="similar-selected__meta">${film.year} · ${film.runtime || "N/A"}${film.runtime ? " min" : ""}</div>
+          <div class="similar-selected__stats">★ ${formatNumber(film.rating)} · ${formatVotes(film.votes)} votes</div>
+          <div class="similar-selected__genres">${(film.genres || []).join(", ")}</div>
+        </div>
+      </article>
+
+      <div class="similar-results">
+        <div class="similar-results__heading">Most similar in the decade</div>
+        <div class="similar-results__grid">
+          ${renderPosterBlock(byRating, "By rating")}
+          ${renderPosterBlock(byRuntime, "By runtime")}
+          ${renderPosterBlock(byGenre, "By genre")}
+        </div>
+      </div>
+    </div>
+  `;
+
+  chartNodes.similarShowcase.querySelectorAll(".similar-card__button").forEach((button) => {
+    button.addEventListener("click", () => {
+      const rank = Number.parseInt(button.dataset.rank, 10);
+      selectedFilm = decade.films.find((candidate) => candidate.rank === rank) || selectedFilm;
+      renderFilmList();
+      renderFilmDetail();
+      renderGenreBrowser();
+      renderSimilarShowcase();
+    });
+  });
 }
 
 function renderFilmDetail() {
@@ -441,6 +709,8 @@ function renderFilmDetail() {
   renderGenreDonut(film);
   renderScatterPlot(film);
   renderDistribution(film);
+  renderGenreBrowser();
+  renderSimilarShowcase();
 
   if (compareButtonNode) compareButtonNode.sub.textContent = `"${film.title}" vs. avg of the ${decade.label}`;
   if (nodes.compareLink) nodes.compareLink.href = `comparison.html?decade=${decade.label}&rank=${film.rank}`;

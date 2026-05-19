@@ -16,7 +16,8 @@
  *   Change API_BASE if your Flask server runs on a different port/host.
  */
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = 'http://localhost:5050';
+//const API_BASE = 'http://localhost:5000';
 
 // In-memory cache  →  avoids redundant network requests when the user
 // slides back to a decade they have already visited.

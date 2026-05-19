@@ -9,19 +9,23 @@ const GENRE_COLORS = {
 function getGenreColor(g) { return GENRE_COLORS[g] || "#888888"; }
 
 const comparisonParams      = new URLSearchParams(window.location.search);
-const comparisonDecadeLabel = comparisonParams.get("decade");
+const initialSourceDecadeLabel = comparisonParams.get("decade") || "1970s";
+const initialReferenceDecadeLabel = comparisonParams.get("referenceDecade") || initialSourceDecadeLabel;
 const comparisonRank        = Number.parseInt(comparisonParams.get("rank") || "1", 10);
 
-let comparisonDecade = null;
+let sourceDecade = null;
+let referenceDecade = null;
 let comparisonFilm   = null;
 
 const comparisonNodes = {
   backLinks:        document.querySelectorAll("[data-back-link]"),
   pageTitle:        document.getElementById("comparisonTitle"),
   pageSubtitle:     document.getElementById("comparisonSubtitle"),
-  heroFilmTitle:    document.getElementById("heroFilmTitle"),
+  filmSelect:       document.getElementById("filmSelect"),
+  filmSourceDecadeSelect: document.getElementById("filmSourceDecadeSelect"),
+  filmSourceNote:   document.getElementById("filmSourceNote"),
   heroFilmMeta:     document.getElementById("heroFilmMeta"),
-  heroDecadeTitle:  document.getElementById("heroDecadeTitle"),
+  referenceDecadeSelect: document.getElementById("referenceDecadeSelect"),
   heroDecadeMeta:   document.getElementById("heroDecadeMeta"),
   metricGrid:       document.getElementById("metricGrid"),
   profileRows:      document.getElementById("profileRows"),
@@ -32,29 +36,107 @@ const comparisonNodes = {
   takeawaySupport:  document.getElementById("takeawaySupport"),
 };
 
+function getSafeReferenceFilmByRank() {
+  if (!referenceDecade || !comparisonFilm) return null;
+  return referenceDecade.films.find((f) => f.rank === comparisonFilm.rank) || null;
+}
+
+function getClosestReferenceFilmByRating() {
+  if (!referenceDecade || !comparisonFilm) return null;
+  return [...referenceDecade.films]
+    .sort((a, b) => Math.abs(a.rating - comparisonFilm.rating) - Math.abs(b.rating - comparisonFilm.rating) || a.rank - b.rank)[0] || null;
+}
+
+function updateComparisonUrl() {
+  const params = new URLSearchParams();
+  params.set("decade", sourceDecade.label);
+  params.set("referenceDecade", referenceDecade.label);
+  params.set("rank", String(comparisonFilm.rank));
+  window.history.replaceState({}, "", `comparison.html?${params.toString()}`);
+}
+
+function populateDecadeControls() {
+  const options = DECADE_ORDER
+    .map((label) => `<option value="${label}">${label}</option>`)
+    .join("");
+
+  comparisonNodes.filmSourceDecadeSelect.innerHTML = options;
+  comparisonNodes.referenceDecadeSelect.innerHTML = options;
+  comparisonNodes.filmSourceDecadeSelect.value = sourceDecade.label;
+  comparisonNodes.referenceDecadeSelect.value = referenceDecade.label;
+}
+
+function populateFilmSelect() {
+  comparisonNodes.filmSelect.innerHTML = sourceDecade.films
+    .map((film) => `<option value="${film.rank}">#${film.rank} · ${film.title}</option>`)
+    .join("");
+  comparisonNodes.filmSelect.value = String(comparisonFilm.rank);
+}
+
+async function switchSourceDecade(decadeLabel) {
+  await getDecadeData(decadeLabel);
+  sourceDecade = getDecadeRecord(decadeLabel);
+  comparisonFilm = sourceDecade.films.find((f) => f.rank === comparisonFilm.rank) || sourceDecade.films[0];
+  rerenderComparison();
+}
+
+async function switchReferenceDecade(decadeLabel) {
+  await getDecadeData(decadeLabel);
+  referenceDecade = getDecadeRecord(decadeLabel);
+  rerenderComparison();
+}
+
+function bindComparisonControls() {
+  comparisonNodes.filmSelect.addEventListener("change", () => {
+    const rank = Number.parseInt(comparisonNodes.filmSelect.value, 10);
+    comparisonFilm = sourceDecade.films.find((f) => f.rank === rank) || comparisonFilm;
+    rerenderComparison();
+  });
+
+  comparisonNodes.filmSourceDecadeSelect.addEventListener("change", async () => {
+    await switchSourceDecade(comparisonNodes.filmSourceDecadeSelect.value);
+  });
+
+  comparisonNodes.referenceDecadeSelect.addEventListener("change", async () => {
+    await switchReferenceDecade(comparisonNodes.referenceDecadeSelect.value);
+  });
+}
+
+function rerenderComparison() {
+  populateDecadeControls();
+  populateFilmSelect();
+  renderComparisonHeader();
+  buildMetricGrid();
+  buildBulletChart();
+  buildProfileRows();
+  buildGenreRows();
+  buildPlacementTrack();
+  buildTakeaway();
+  updateComparisonUrl();
+}
+
 // ── Header ────────────────────────────────────────────────────────────────────
 function renderComparisonHeader() {
-  document.documentElement.style.setProperty("--page-accent", comparisonDecade.meta.accent);
-  document.title = `${comparisonFilm.title} vs ${comparisonDecade.label}`;
-  comparisonNodes.pageTitle.textContent     = `${comparisonFilm.title} vs ${comparisonDecade.label}`;
-  comparisonNodes.pageSubtitle.textContent  = comparisonDecade.meta.blurb;
-  comparisonNodes.heroFilmTitle.textContent = comparisonFilm.title;
+  document.documentElement.style.setProperty("--page-accent", referenceDecade.meta.accent);
+  document.title = `${comparisonFilm.title} vs ${referenceDecade.label}`;
+  comparisonNodes.pageTitle.textContent     = `${comparisonFilm.title} vs ${referenceDecade.label}`;
+  comparisonNodes.pageSubtitle.textContent  = referenceDecade.meta.blurb;
+  comparisonNodes.filmSourceNote.textContent = `Selected film from ${sourceDecade.label}`;
   comparisonNodes.heroFilmMeta.textContent  = `${comparisonFilm.year} · rank #${comparisonFilm.rank} · ${formatNumber(comparisonFilm.rating)}/10`;
-  comparisonNodes.heroDecadeTitle.textContent = `${comparisonDecade.label} average`;
-  comparisonNodes.heroDecadeMeta.textContent  = `${comparisonDecade.filmCount} films · ${formatNumber(comparisonDecade.avgRating)}/10 · ${Math.round(comparisonDecade.avgRuntime)} min`;
-  comparisonNodes.backLinks.forEach((link) => { link.href = `${comparisonDecade.label}.html`; });
+  comparisonNodes.heroDecadeMeta.textContent  = `${referenceDecade.filmCount} films · ${formatNumber(referenceDecade.avgRating)}/10 · ${Math.round(referenceDecade.avgRuntime)} min`;
+  comparisonNodes.backLinks.forEach((link) => { link.href = `${sourceDecade.label}.html`; });
 }
 
 // ── Key metrics ───────────────────────────────────────────────────────────────
 function buildMetricGrid() {
   const filmRuntime   = comparisonFilm.runtime || 0;
-  const decadeRuntime = Math.round(comparisonDecade.avgRuntime || 0);
+  const decadeRuntime = Math.round(referenceDecade.avgRuntime || 0);
   const filmGenres    = comparisonFilm.genres || [];
-  const sharedGenres  = filmGenres.filter((g) => comparisonDecade.genreStats.some((e) => e.genre === g)).length;
+  const sharedGenres  = filmGenres.filter((g) => referenceDecade.genreStats.some((e) => e.genre === g)).length;
 
   const items = [
-    { label: "Rating delta",  filmVal: `${comparisonFilm.rating >= comparisonDecade.avgRating ? "+" : ""}${formatNumber(comparisonFilm.rating - comparisonDecade.avgRating)}`, decadeVal: `${formatNumber(comparisonDecade.avgRating)}/10`, note: `Film: ${formatNumber(comparisonFilm.rating)}/10 · Decade avg: ${formatNumber(comparisonDecade.avgRating)}/10` },
-    { label: "Popularity",    filmVal: formatVotes(comparisonFilm.votes), decadeVal: formatVotes(comparisonDecade.avgVotes), note: `Film: ${formatVotes(comparisonFilm.votes)} · Decade avg: ${formatVotes(comparisonDecade.avgVotes)}` },
+    { label: "Rating delta",  filmVal: `${comparisonFilm.rating >= referenceDecade.avgRating ? "+" : ""}${formatNumber(comparisonFilm.rating - referenceDecade.avgRating)}`, decadeVal: `${formatNumber(referenceDecade.avgRating)}/10`, note: `Film: ${formatNumber(comparisonFilm.rating)}/10 · Decade avg: ${formatNumber(referenceDecade.avgRating)}/10` },
+    { label: "Popularity",    filmVal: formatVotes(comparisonFilm.votes), decadeVal: formatVotes(referenceDecade.avgVotes), note: `Film: ${formatVotes(comparisonFilm.votes)} · Decade avg: ${formatVotes(referenceDecade.avgVotes)}` },
     { label: "Runtime delta", filmVal: `${filmRuntime - decadeRuntime >= 0 ? "+" : ""}${filmRuntime - decadeRuntime} min`, decadeVal: `${decadeRuntime} min`, note: `Film: ${filmRuntime} min · Decade avg: ${decadeRuntime} min` },
     { label: "Genre overlap", filmVal: `${sharedGenres}/${filmGenres.length}`, decadeVal: `${sharedGenres} shared`, note: "Genres of this film present in the decade ranking" },
   ];
@@ -81,19 +163,19 @@ function buildBulletChart() {
   const filmColor   = "#d4a84b";
   const decadeColor = "#7b9fd4";
   const filmRuntime   = comparisonFilm.runtime || 0;
-  const decadeRuntime = comparisonDecade.avgRuntime || 0;
+  const decadeRuntime = referenceDecade.avgRuntime || 0;
 
-  const allVotes    = comparisonDecade.films.map(f => f.votes).filter(Number.isFinite);
-  const allRuntimes = comparisonDecade.films.map(f => f.runtime).filter(Number.isFinite);
+  const allVotes    = referenceDecade.films.map(f => f.votes).filter(Number.isFinite);
+  const allRuntimes = referenceDecade.films.map(f => f.runtime).filter(Number.isFinite);
 
   // Scale fisse con 0 come origine
-  const allRatings  = comparisonDecade.films.map(f => f.rating).filter(Number.isFinite);
+  const allRatings  = referenceDecade.films.map(f => f.rating).filter(Number.isFinite);
 
   const metrics = [
     {
       label: "IMDb Rating", unit: "/10",
       scaleMin: 0, scaleMax: 10,
-      avg: comparisonDecade.avgRating,
+      avg: referenceDecade.avgRating,
       film: comparisonFilm.rating,
       dMin: allRatings.length ? Math.min(...allRatings) : 0,
       dMax: allRatings.length ? Math.max(...allRatings) : 10,
@@ -103,7 +185,7 @@ function buildBulletChart() {
     {
       label: "Votes", unit: "",
       scaleMin: 0, scaleMax: Math.max(1000000, comparisonFilm.votes, ...allVotes),
-      avg: comparisonDecade.avgVotes,
+      avg: referenceDecade.avgVotes,
       film: comparisonFilm.votes,
       dMin: Math.min(...allVotes, 0),
       dMax: Math.max(...allVotes, 1),
@@ -186,9 +268,9 @@ function buildBulletChart() {
 // ── Profile rows ──────────────────────────────────────────────────────────────
 function buildProfileRows() {
   const filmRuntime   = comparisonFilm.runtime || 0;
-  const decadeRuntime = comparisonDecade.avgRuntime || 0;
-  const maxVotes      = Math.max(comparisonFilm.votes, comparisonDecade.avgVotes) || 1;
-  const maxRuntime    = Math.max(filmRuntime, comparisonDecade.maxRuntime || decadeRuntime) || 1;
+  const decadeRuntime = referenceDecade.avgRuntime || 0;
+  const maxVotes      = Math.max(comparisonFilm.votes, referenceDecade.avgVotes) || 1;
+  const maxRuntime    = Math.max(filmRuntime, referenceDecade.maxRuntime || decadeRuntime) || 1;
 
   const legend = document.createElement("div");
   legend.className = "comparison-legend";
@@ -197,8 +279,8 @@ function buildProfileRows() {
   comparisonNodes.profileRows.appendChild(legend);
 
   [
-    { label: "IMDb rating", film: comparisonFilm.rating, decade: comparisonDecade.avgRating, max: 10, fmt: v => `${formatNumber(v)}/10` },
-    { label: "Votes",       film: comparisonFilm.votes,  decade: comparisonDecade.avgVotes,  max: maxVotes, fmt: v => formatVotes(v) },
+    { label: "IMDb rating", film: comparisonFilm.rating, decade: referenceDecade.avgRating, max: 10, fmt: v => `${formatNumber(v)}/10` },
+    { label: "Votes",       film: comparisonFilm.votes,  decade: referenceDecade.avgVotes,  max: maxVotes, fmt: v => formatVotes(v) },
     { label: "Runtime",     film: filmRuntime,           decade: decadeRuntime,              max: maxRuntime, fmt: v => `${Math.round(v)} min` },
   ].forEach((m) => {
     const row = document.createElement("div");
@@ -218,7 +300,7 @@ function buildProfileRows() {
 // ── Genre rows ────────────────────────────────────────────────────────────────
 function buildGenreRows() {
   const filmGenres = comparisonFilm.genres || [];
-  const combined   = Array.from(new Set([...filmGenres, ...comparisonDecade.genreStats.slice(0, 6).map(e => e.genre)])).slice(0, 8);
+  const combined   = Array.from(new Set([...filmGenres, ...referenceDecade.genreStats.slice(0, 6).map(e => e.genre)])).slice(0, 8);
 
   const legend = document.createElement("div");
   legend.className = "comparison-legend";
@@ -227,7 +309,7 @@ function buildGenreRows() {
   comparisonNodes.genreRows.appendChild(legend);
 
   combined.forEach((genre) => {
-    const entry     = comparisonDecade.genreStats.find(e => e.genre === genre);
+    const entry     = referenceDecade.genreStats.find(e => e.genre === genre);
     const decadeVal = entry ? entry.percentage : 0;
     const filmHas   = filmGenres.includes(genre);
     const row       = document.createElement("div");
@@ -247,25 +329,29 @@ function buildGenreRows() {
 // ── Placement track ───────────────────────────────────────────────────────────
 function buildPlacementTrack() {
   comparisonNodes.placementTrack.innerHTML = "";
-  comparisonDecade.films.forEach((film) => {
+  const aligned = getSafeReferenceFilmByRank() || getClosestReferenceFilmByRating();
+  referenceDecade.films.forEach((film) => {
     const item = document.createElement("div");
-    item.className = `placement-item${film.rank === comparisonFilm.rank ? " active" : ""}`;
+    item.className = `placement-item${aligned && film.rank === aligned.rank ? " active" : ""}`;
     item.innerHTML = `<span>#${film.rank}</span><small>${formatNumber(film.rating)}</small>`;
     comparisonNodes.placementTrack.appendChild(item);
   });
-  const pr = getFilmPercentile(comparisonFilm, comparisonDecade.films, "votes");
+  const pr = getFilmPercentile(comparisonFilm, referenceDecade.films, "votes");
+  const modeText = getSafeReferenceFilmByRank()
+    ? `same-rank slot #${comparisonFilm.rank}`
+    : `closest-rating slot #${aligned ? aligned.rank : "—"}`;
   comparisonNodes.placementSummary.textContent =
-    `${comparisonFilm.title} ranks #${comparisonFilm.rank} by rating in the ${comparisonDecade.label} sample` +
+    `${comparisonFilm.title} maps to ${modeText} in the ${referenceDecade.label} sample` +
     ` and ${pr ? `#${pr.rank}` : "outside the top list"} by vote count.`;
 }
 
 // ── Takeaway ──────────────────────────────────────────────────────────────────
 function buildTakeaway() {
   const filmGenres     = comparisonFilm.genres || [];
-  const ratingDelta    = comparisonFilm.rating - comparisonDecade.avgRating;
-  const voteDelta      = comparisonFilm.votes  - comparisonDecade.avgVotes;
+  const ratingDelta    = comparisonFilm.rating - referenceDecade.avgRating;
+  const voteDelta      = comparisonFilm.votes  - referenceDecade.avgVotes;
   const strongestGenre = filmGenres
-    .map(g => comparisonDecade.genreStats.find(e => e.genre === g))
+    .map(g => referenceDecade.genreStats.find(e => e.genre === g))
     .filter(Boolean)
     .sort((a, b) => b.percentage - a.percentage)[0];
 
@@ -280,18 +366,14 @@ function buildTakeaway() {
 
 // ── Entry point ───────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
-  if (!comparisonDecadeLabel) {
-    document.body.innerHTML = "<main class='error-state'>Nessuna decade specificata.</main>";
-    return;
-  }
-
   try {
-    await getDecadeData(comparisonDecadeLabel);
-    comparisonDecade = getDecadeRecord(comparisonDecadeLabel);
+    await Promise.all([getDecadeData(initialSourceDecadeLabel), getDecadeData(initialReferenceDecadeLabel)]);
+    sourceDecade = getDecadeRecord(initialSourceDecadeLabel);
+    referenceDecade = getDecadeRecord(initialReferenceDecadeLabel);
   } catch (err) {
     document.body.innerHTML = `
       <main style="padding:60px 32px;font-family:serif;color:#e8d5a3;background:#05050f;min-height:100vh">
-        <h1 style="font-size:36px;margin-top:12px">Impossibile caricare ${comparisonDecadeLabel}</h1>
+        <h1 style="font-size:36px;margin-top:12px">Impossibile caricare i dati di confronto</h1>
         <p style="opacity:.6;margin-top:16px">Assicurati che il server Flask sia avviato su localhost:5000.</p>
         <p style="opacity:.4;font-size:12px">${err.message}</p>
         <a href="index.html" style="display:inline-block;margin-top:32px;color:inherit">← Torna all'indice</a>
@@ -299,22 +381,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  if (!comparisonDecade) {
+  if (!sourceDecade || !referenceDecade) {
     document.body.innerHTML = "<main class='error-state'>Dati non disponibili.</main>";
     return;
   }
 
-  comparisonFilm = comparisonDecade.films.find(f => f.rank === comparisonRank) || comparisonDecade.films[0];
+  comparisonFilm = sourceDecade.films.find(f => f.rank === comparisonRank) || sourceDecade.films[0];
   if (!comparisonFilm) {
     document.body.innerHTML = "<main class='error-state'>Film non trovato.</main>";
     return;
   }
 
-  renderComparisonHeader();
-  buildMetricGrid();
-  buildBulletChart();
-  buildProfileRows();
-  buildGenreRows();
-  buildPlacementTrack();
-  buildTakeaway();
+  bindComparisonControls();
+  rerenderComparison();
 });

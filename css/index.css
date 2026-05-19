@@ -171,6 +171,7 @@ body::after {
 .cta-wrap {
   margin-top: 36px; height: 48px;
   display: flex; align-items: center; justify-content: center;
+  gap: 12px;
 }
 
 .cta-btn {
@@ -178,7 +179,7 @@ body::after {
   padding: 12px 32px;
   border: 1px solid var(--gold-dim);
   color: var(--gold); background: transparent;
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Playfair Display', serif;
   font-size: 14px; letter-spacing: 3px; text-transform: uppercase;
   text-decoration: none; cursor: pointer;
   position: relative; overflow: hidden;
@@ -188,6 +189,12 @@ body::after {
 
 .cta-btn.visible { opacity: 1; transform: translateY(0); }
 .cta-btn:hover   { background: rgba(232,213,163,0.1); border-color: var(--gold); }
+
+.cta-btn--secondary {
+  border-color: rgba(232, 213, 163, 0.25);
+  color: var(--gold-mid);
+  font-family: "Playfair Display", serif;
+}
 
 .dots { display: flex; gap: 8px; margin-top: 28px; z-index: 10; position: relative; }
 

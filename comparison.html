@@ -30,12 +30,21 @@
       <div class="hero-cards">
         <article class="hero-card hero-card--film">
           <span>Selected film</span>
-          <strong id="heroFilmTitle">—</strong>
+          <label class="comparison-select-wrap">
+            <select id="filmSelect" class="comparison-select"></select>
+          </label>
+          <small id="filmSourceNote">From decade: —</small>
+          <label class="comparison-inline">
+            <span>Film decade</span>
+            <select id="filmSourceDecadeSelect" class="comparison-select comparison-select--small"></select>
+          </label>
           <small id="heroFilmMeta">—</small>
         </article>
         <article class="hero-card hero-card--decade">
           <span>Decade reference</span>
-          <strong id="heroDecadeTitle">—</strong>
+          <label class="comparison-select-wrap">
+            <select id="referenceDecadeSelect" class="comparison-select"></select>
+          </label>
           <small id="heroDecadeMeta">—</small>
         </article>
       </div>
