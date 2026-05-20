@@ -1,16 +1,16 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --gold: #e8d5a3;
-  --gold-dim: rgba(232, 213, 163, 0.4);
-  --gold-mid: rgba(232, 213, 163, 0.65);
-  --gold-faint: rgba(232, 213, 163, 0.12);
-  --accent: #d4a84b;
-  --accent-soft: rgba(212, 168, 75, 0.12);
+  --gold: #F2E6C8;
+  --gold-dim: rgba(242, 230, 200, 0.72);
+  --gold-mid: rgba(242, 230, 200, 0.9);
+  --gold-faint: rgba(242, 230, 200, 0.16);
+  --accent: #E4B85C;
+  --accent-soft: rgba(228, 184, 92, 0.18);
   --deep: #05050f;
-  --panel-bg: rgba(232, 213, 163, 0.04);
-  --border: rgba(232, 213, 163, 0.12);
-  --border-hover: rgba(232, 213, 163, 0.35);
+  --panel-bg: rgba(242, 230, 200, 0.06);
+  --border: rgba(242, 230, 200, 0.18);
+  --border-hover: rgba(242, 230, 200, 0.45);
   --plot-muted: rgba(91, 110, 136, 0.55);
   --plot-muted-soft: rgba(91, 110, 136, 0.22);
 }
@@ -46,7 +46,7 @@ a { color: inherit; }
   align-items: center;
   justify-content: space-between;
   padding: 0 32px;
-  background: linear-gradient(to bottom, rgba(5, 5, 15, 0.98) 0%, transparent 100%);
+  background: linear-gradient(to bottom, rgba(15, 15, 15, 0.98) 0%, transparent 100%);
   border-bottom: 1px solid var(--border);
 }
 
@@ -346,7 +346,7 @@ a { color: inherit; }
   margin-top: 14px;
   font-size: 14px;
   line-height: 1.7;
-  color: rgba(232, 213, 163, 0.65);
+  color: rgba(242, 230, 200, 0.82);
 }
 
 .insight-card .primary-link { display: none; }
@@ -573,7 +573,7 @@ a { color: inherit; }
   display: block;
   margin-top: 3px;
   font-size: 11px;
-  color: rgba(232, 213, 163, 0.65);
+  color: rgba(242, 230, 200, 0.82);
 }
 
 .film-list__rating {
