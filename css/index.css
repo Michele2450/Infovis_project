@@ -191,8 +191,6 @@ body::after {
 .cta-btn:hover   { background: rgba(232,213,163,0.1); border-color: var(--gold); }
 
 .cta-btn--secondary {
-  border-color: rgba(232, 213, 163, 0.25);
-  color: var(--gold-mid);
   font-family: "Playfair Display", serif;
 }
 
