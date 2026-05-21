@@ -80,26 +80,6 @@
         <button id="lineResetFiltersBtn" class="line-toggle">Reset filters</button>
         <button id="lineResetViewBtn" class="line-toggle">Back to default view</button>
       </div>
-      <div class="decade-picker-row">
-        <label class="line-select-wrap" for="globalDecadeSelect">
-          <select id="globalDecadeSelect" class="line-select">
-            <option value="">Selected decade: auto</option>
-            <option value="1900s">1900s</option>
-            <option value="1910s">1910s</option>
-            <option value="1920s">1920s</option>
-            <option value="1930s">1930s</option>
-            <option value="1940s">1940s</option>
-            <option value="1950s">1950s</option>
-            <option value="1960s">1960s</option>
-            <option value="1970s">1970s</option>
-            <option value="1980s">1980s</option>
-            <option value="1990s">1990s</option>
-            <option value="2000s">2000s</option>
-            <option value="2010s">2010s</option>
-            <option value="2020s">2020s</option>
-          </select>
-        </label>
-      </div>
       <div id="genreFilters" class="genre-filters"></div>
       <div id="lineChartHint" class="line-hint" aria-live="polite"></div>
       <div class="chart-wrap">
@@ -119,6 +99,22 @@
         </div>
       </div>
       <div class="bubble-controls">
+        <select id="bubbleDecadeFilter" class="bubble-control">
+          <option value="All">All decades</option>
+          <option value="1900s">1900s</option>
+          <option value="1910s">1910s</option>
+          <option value="1920s">1920s</option>
+          <option value="1930s">1930s</option>
+          <option value="1940s">1940s</option>
+          <option value="1950s">1950s</option>
+          <option value="1960s">1960s</option>
+          <option value="1970s">1970s</option>
+          <option value="1980s">1980s</option>
+          <option value="1990s">1990s</option>
+          <option value="2000s">2000s</option>
+          <option value="2010s">2010s</option>
+          <option value="2020s">2020s</option>
+        </select>
         <select id="bubbleGenreFilter" class="bubble-control">
           <option value="All">All</option>
           <option>Drama</option>

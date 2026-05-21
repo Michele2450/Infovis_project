@@ -1,69 +1,399 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About — Decade Evolution</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cormorant+Garamond:wght@400;500&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About This Project</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --bg: #05050f;
-      --card: rgba(232, 213, 163, 0.05);
-      --text: #e8d5a3;
-      --muted: rgba(232, 213, 163, 0.8);
-      --border: rgba(232, 213, 163, 0.2);
+      --bg: #07070d;
+      --card: #111116;
+      --card-soft: #17171d;
+      --text: #f2e6c8;
+      --muted: #b8aa8a;
+      --gold: #e4b85c;
+      --gold-soft: #cdbf9a;
+      --border: rgba(242, 230, 200, 0.18);
+      --border-strong: rgba(228, 184, 92, 0.35);
+      --shadow: rgba(0, 0, 0, 0.45);
     }
-    * { box-sizing: border-box; }
-    body {
+
+    * {
+      box-sizing: border-box;
       margin: 0;
+      padding: 0;
+    }
+
+    body {
       min-height: 100vh;
-      background: var(--bg);
+      background:
+        radial-gradient(circle at 20% 10%, rgba(228, 184, 92, 0.08), transparent 30%),
+        radial-gradient(circle at 80% 80%, rgba(111, 143, 168, 0.08), transparent 35%),
+        var(--bg);
       color: var(--text);
       font-family: "Cormorant Garamond", serif;
-      display: grid;
-      place-items: center;
-      padding: 24px;
+      padding: 28px 36px;
     }
-    .card {
-      width: min(900px, 100%);
-      border: 1px solid var(--border);
-      background: var(--card);
-      border-radius: 14px;
-      padding: 28px;
+
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
     }
-    h1 {
-      margin: 0 0 10px;
-      font-family: "Playfair Display", serif;
-      font-size: clamp(30px, 4vw, 48px);
-      letter-spacing: 1px;
-    }
-    p {
-      margin: 10px 0;
-      color: var(--muted);
-      font-size: 20px;
-      line-height: 1.5;
-    }
-    a {
-      display: inline-block;
-      margin-top: 18px;
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      padding: 10px 18px;
       border: 1px solid var(--border);
       color: var(--text);
       text-decoration: none;
-      padding: 10px 16px;
-      font-family: "Playfair Display", serif;
-      letter-spacing: 2px;
-      text-transform: uppercase;
+      font-family: "Cinzel", serif;
       font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      background: rgba(255, 255, 255, 0.02);
+      transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+    }
+
+    .back-link:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(228, 184, 92, 0.06);
+    }
+
+    .hero-card {
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: linear-gradient(145deg, rgba(17, 17, 22, 0.98), rgba(11, 11, 16, 0.98));
+      padding: 42px;
+      box-shadow: 0 20px 60px var(--shadow);
+    }
+
+    .eyebrow {
+      color: var(--gold);
+      font-family: "Cinzel", serif;
+      font-size: 12px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: clamp(42px, 5vw, 76px);
+      line-height: 0.95;
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      margin-bottom: 24px;
+    }
+
+    .intro {
+      max-width: 960px;
+      color: var(--gold-soft);
+      font-size: clamp(21px, 1.7vw, 28px);
+      line-height: 1.38;
+      margin-bottom: 24px;
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--border-strong), transparent);
+      margin: 30px 0;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 34px;
+    }
+
+    .info-card {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.025);
+      padding: 22px;
+    }
+
+    .info-card h2 {
+      color: var(--gold);
+      font-size: 22px;
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+
+    .info-card p {
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.38;
+    }
+
+    .section {
+      margin-top: 34px;
+    }
+
+    .section h2 {
+      color: var(--text);
+      font-size: clamp(28px, 2.4vw, 40px);
+      line-height: 1;
+      margin-bottom: 14px;
+    }
+
+    .section p {
+      max-width: 980px;
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+
+    .question-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .question {
+      border-left: 2px solid var(--gold);
+      background: rgba(228, 184, 92, 0.055);
+      padding: 14px 18px;
+      color: var(--gold-soft);
+      font-size: 18px;
+      line-height: 1.3;
+    }
+
+    .visualization-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .visualization-item {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 20px;
+      background: var(--card-soft);
+    }
+
+    .visualization-item h3 {
+      color: var(--gold);
+      font-size: 21px;
+      margin-bottom: 6px;
+    }
+
+    .visualization-item p {
+      font-size: 17px;
+      line-height: 1.35;
+      margin: 0;
+    }
+
+    .principles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .chip {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 14px;
+      color: var(--text);
+      font-family: "Inter", sans-serif;
+      font-size: 12px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .footer {
+      margin-top: 38px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .footer strong {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    @media (max-width: 950px) {
+      body {
+        padding: 20px 16px;
+      }
+
+      .hero-card {
+        padding: 26px 20px;
+        border-radius: 22px;
+      }
+
+      .cards,
+      .question-grid,
+      .visualization-list {
+        grid-template-columns: 1fr;
+      }
+
+      .footer {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
+
 <body>
-  <section class="card">
-    <h1>About This Project</h1>
-    <p>Decade Evolution is an interactive visual storytelling project about cinema history from the 1900s to the 2020s.</p>
-    <p>We combine IMDb-style ranking data, genre prevalence, and temporal comparisons to help users explore how film taste changes across decades.</p>
-    <p>The goal is to make trends understandable and engaging through clean, cinematic information visualization.</p>
-    <a href="index.html">← Back to Home</a>
-  </section>
+  <main class="page">
+    <a class="back-link" href="index.html">← Back to Home</a>
+
+    <section class="hero-card">
+      <p class="eyebrow">About the project</p>
+
+      <h1>About This Project</h1>
+
+      <p class="intro">
+        Decade Evolution is an interactive visual storytelling project that explores how cinema has changed from the 1900s to the 2020s.
+      </p>
+
+      <p class="intro">
+        Using IMDb-style film ranking data, the project visualizes changes in ratings, popularity, genre prevalence, and genre combinations across decades.
+      </p>
+
+      <div class="divider"></div>
+
+      <div class="cards">
+        <article class="info-card">
+          <h2>What it explores</h2>
+          <p>
+            The project studies genre trends, film ratings, popularity, and the evolution of cinema across different decades.
+          </p>
+        </article>
+
+        <article class="info-card">
+          <h2>Data used</h2>
+          <p>
+            The visualizations use IMDb-style film data, including titles, release years, ratings, votes, rankings, directors, runtime, and genres.
+          </p>
+        </article>
+
+        <article class="info-card">
+          <h2>How to use it</h2>
+          <p>
+            Users can filter genres, compare decades, hover for details, inspect individual films, and explore how patterns change over time.
+          </p>
+        </article>
+      </div>
+
+      <section class="section">
+        <h2>Project Goal</h2>
+        <p>
+          The main goal is to make long-term cinema trends understandable through clear, interactive, and visually engaging information visualization.
+        </p>
+        <p>
+          Instead of only showing a list of films, the project helps users discover historical patterns: which genres became more common, which decades have highly rated films, how popularity is distributed, and which genres tend to appear together.
+        </p>
+
+        <div class="question-grid">
+          <div class="question">Which genres became more common over time?</div>
+          <div class="question">Which decades contain the highest-rated films?</div>
+          <div class="question">How does film popularity vary across time?</div>
+          <div class="question">Which genres are commonly combined?</div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Visualizations Included</h2>
+        <p>
+          Each visualization answers a different analytical question, so users can move from overview to detail.
+        </p>
+
+        <div class="visualization-list">
+          <article class="visualization-item">
+            <h3>Genre Prevalence Heatmap</h3>
+            <p>Shows how common each genre is across decades using a low-to-high color scale.</p>
+          </article>
+
+          <article class="visualization-item">
+            <h3>Average Rating Line Chart</h3>
+            <p>Shows how film ratings change over time and allows comparison by genre.</p>
+          </article>
+
+          <article class="visualization-item">
+            <h3>Rating and Popularity Scatterplot</h3>
+            <p>Shows individual films by release year, rating, and number of IMDb votes.</p>
+          </article>
+
+          <article class="visualization-item">
+            <h3>Decade Comparison Views</h3>
+            <p>Shows how genres increase or decrease between selected decades.</p>
+          </article>
+
+          <article class="visualization-item">
+            <h3>Rating Distribution Chart</h3>
+            <p>Shows the spread of ratings in each decade, not only the average.</p>
+          </article>
+
+          <article class="visualization-item">
+            <h3>Genre Co-occurrence Network</h3>
+            <p>Shows which genres often appear together and how combinations evolve.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Data Meaning</h2>
+        <p>
+          The project treats genres as multi-label categories, meaning one film can belong to several genres. For example, a film can be Adventure, Drama, and Western at the same time.
+        </p>
+        <p>
+          Genre prevalence is calculated as the percentage of films in a decade that include a given genre. This makes it possible to compare genre importance across decades even when decades contain different numbers of films.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>Design Approach</h2>
+        <p>
+          The interface uses a dark cinematic visual style to match the theme of film history. Warm beige and gold tones are used for emphasis, while muted colors reduce visual clutter.
+        </p>
+        <p>
+          The design prioritizes readability, comparison, visual hierarchy, and meaningful interaction. The objective is to make the project feel cinematic without sacrificing clarity.
+        </p>
+
+        <div class="principles">
+          <span class="chip">Clear hierarchy</span>
+          <span class="chip">Consistent color encoding</span>
+          <span class="chip">Overview first</span>
+          <span class="chip">Details on demand</span>
+          <span class="chip">Reduced clutter</span>
+          <span class="chip">Interactive exploration</span>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Limitations</h2>
+        <p>
+          This project does not claim to represent every film ever made. The results depend on the dataset, the ranking criteria, and the availability of rating and vote information.
+        </p>
+        <p>
+          Older films may have fewer votes than recent films, which can affect popularity comparisons. Ratings can also be influenced by platform bias, audience demographics, and historical visibility.
+        </p>
+      </section>
+
+      <footer class="footer">
+        <p><strong>Created by:</strong> Michele Craia and Mariona Espí</p>
+        <p><strong>Focus:</strong> Information visualization, cinema history, temporal analysis, and interactive storytelling.</p>
+      </footer>
+    </section>
+  </main>
 </body>
 </html>

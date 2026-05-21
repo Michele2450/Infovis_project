@@ -50,6 +50,7 @@ const state = {
   hoveredGenre: null,
   pinnedGenre: null,
   bubble: {
+    decade: "All",
     genre: "All",
     minRating: 0,
     minVotes: 0,
@@ -107,6 +108,7 @@ function syncUrlFromState() {
   p.set("lineScale", state.lineScaleMode);
   p.set("lineStat", state.lineStatMode);
   p.set("bubbleGenre", state.bubble.genre);
+  p.set("bubbleDecade", state.bubble.decade);
   p.set("minRating", String(state.bubble.minRating));
   p.set("minVotes", String(state.bubble.minVotes));
   if (state.bubble.search) p.set("search", state.bubble.search);
@@ -125,6 +127,7 @@ function loadStateFromUrl() {
   state.lineScaleMode = p.get("lineScale") === "full" ? "full" : "zoomed";
   state.lineStatMode = p.get("lineStat") === "median" ? "median" : "average";
   state.bubble.genre = p.get("bubbleGenre") || "All";
+  state.bubble.decade = p.get("bubbleDecade") || "All";
   state.bubble.minRating = Number(p.get("minRating") || 0);
   state.bubble.minVotes = Number(p.get("minVotes") || 0);
   state.bubble.search = p.get("search") || "";
@@ -758,6 +761,7 @@ function buildBubbleChart() {
 
   const focusGenre = state.pinnedGenre || state.hoveredGenre;
   const rows = rowsAll.filter((r) => {
+    if (state.bubble.decade !== "All" && r.decade !== state.bubble.decade) return false;
     if (r.rating < state.bubble.minRating) return false;
     if (r.votes < state.bubble.minVotes) return false;
     if (state.bubble.genre !== "All" && !r.genres.includes(state.bubble.genre)) return false;
@@ -1029,8 +1033,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadData();
     const scaleToggle = document.getElementById("scaleToggle");
     const statSelect = document.getElementById("statSelect");
-    const globalDecadeSelect = document.getElementById("globalDecadeSelect");
     const bubbleGenre = document.getElementById("bubbleGenreFilter");
+    const bubbleDecade = document.getElementById("bubbleDecadeFilter");
     const bubbleMinRating = document.getElementById("bubbleMinRating");
     const bubbleMinVotes = document.getElementById("bubbleMinVotes");
     const bubbleMinRatingValue = document.getElementById("bubbleMinRatingValue");
@@ -1059,6 +1063,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     if (statSelect) statSelect.value = state.lineStatMode;
     if (bubbleGenre) bubbleGenre.value = state.bubble.genre;
+    if (bubbleDecade) bubbleDecade.value = state.bubble.decade;
     if (bubbleMinRating && bubbleMinRatingValue) {
       bubbleMinRating.value = String(state.bubble.minRating);
       bubbleMinRatingValue.textContent = state.bubble.minRating.toFixed(1);
@@ -1087,12 +1092,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         syncUrlFromState();
       });
     }
-    if (globalDecadeSelect) {
-      if (state.selectedDecade && DECADE_ORDER.includes(state.selectedDecade)) {
-        globalDecadeSelect.value = state.selectedDecade;
-      }
-      globalDecadeSelect.addEventListener("change", () => {
-        state.selectedDecade = globalDecadeSelect.value || null;
+    if (bubbleDecade) {
+      bubbleDecade.addEventListener("change", () => {
+        state.bubble.decade = bubbleDecade.value;
         buildBubbleChart();
         syncUrlFromState();
       });
@@ -1167,10 +1169,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (bubbleResetFiltersBtn) {
       bubbleResetFiltersBtn.addEventListener("click", () => {
         state.bubble.genre = "All";
+        state.bubble.decade = "All";
         state.bubble.minRating = 0;
         state.bubble.minVotes = 0;
         state.bubble.search = "";
         if (bubbleGenre) bubbleGenre.value = "All";
+        if (bubbleDecade) bubbleDecade.value = "All";
         if (bubbleMinRating) bubbleMinRating.value = "0";
         if (bubbleMinRatingValue) bubbleMinRatingValue.textContent = "0.0";
         if (bubbleMinVotes) bubbleMinVotes.value = "0";
@@ -1189,14 +1193,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         state.bubble.pinned = [];
         if (bubbleHighlightMode) bubbleHighlightMode.value = "reset";
         if (bubbleColorMode) bubbleColorMode.value = "release-decade";
-        if (globalDecadeSelect) globalDecadeSelect.value = "";
         buildBubbleChart();
         syncUrlFromState();
       });
     }
     if (bubbleResetViewBtn) {
       bubbleResetViewBtn.addEventListener("click", () => {
-        state.bubble = { genre: "All", minRating: 0, minVotes: 0, search: "", highlightMode: "reset", sizeMode: "votes", colorMode: "release-decade", brushRange: null, pinned: [] };
+        state.bubble = { decade: "All", genre: "All", minRating: 0, minVotes: 0, search: "", highlightMode: "reset", sizeMode: "votes", colorMode: "release-decade", brushRange: null, pinned: [] };
+        if (bubbleDecade) bubbleDecade.value = "All";
         if (bubbleGenre) bubbleGenre.value = "All";
         if (bubbleMinRating) bubbleMinRating.value = "0";
         if (bubbleMinRatingValue) bubbleMinRatingValue.textContent = "0.0";
