@@ -2,13 +2,13 @@
 
 :root {
   --page-accent: #d4a84b;
-  --gold: #e8d5a3;
-  --gold-dim: rgba(232, 213, 163, 0.4);
-  --gold-mid: rgba(232, 213, 163, 0.65);
+  --gold: #f2e6c8;
+  --gold-dim: rgba(242, 230, 200, 0.82);
+  --gold-mid: rgba(242, 230, 200, 0.95);
   --gold-faint: rgba(232, 213, 163, 0.12);
-  --panel-bg: rgba(232, 213, 163, 0.04);
-  --border: rgba(232, 213, 163, 0.12);
-  --border-hover: rgba(232, 213, 163, 0.35);
+  --panel-bg: rgba(242, 230, 200, 0.08);
+  --border: rgba(242, 230, 200, 0.24);
+  --border-hover: rgba(242, 230, 200, 0.5);
   --deep: #05050f;
   --accent-b: rgba(232, 213, 163, 0.52);
   --plot-muted: rgba(91, 110, 136, 0.55);
@@ -56,27 +56,27 @@ a { color: inherit; }
 
 .topbar__brand {
   font-family: "Playfair Display", serif;
-  font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+  font-size: 12px; letter-spacing: 4px; text-transform: uppercase;
 }
 
 .topbar__center { text-align: center; }
 
 .topbar__center span {
-  display: block; font-size: 10px; letter-spacing: 3px;
+  display: block; font-size: 11px; letter-spacing: 3px;
   text-transform: uppercase; color: var(--page-accent);
 }
 
 .topbar__center strong {
   display: block; margin-top: 4px;
   font-family: "Playfair Display", serif;
-  font-size: 14px; color: var(--page-accent);
+  font-size: 16px; color: var(--page-accent);
 }
 
 .hero-panel { padding: 34px 0 18px; }
 
 .eyebrow {
   margin: 0 0 10px;
-  font-size: 9px; letter-spacing: 4px; text-transform: uppercase;
+  font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
   color: var(--page-accent);
 }
 
@@ -84,12 +84,12 @@ a { color: inherit; }
   margin: 0; font-family: "Playfair Display", serif;
 }
 
-.hero-panel h1 { font-size: clamp(32px, 4vw, 52px); line-height: 1.04; }
+.hero-panel h1 { font-size: clamp(38px, 4.2vw, 58px); line-height: 1.04; }
 
 .hero-copy p:last-child, .panel-copy {
-  color: rgba(232, 213, 163, 0.7);
+  color: rgba(242, 230, 200, 0.9);
   line-height: 1.75;
-  font-size: 15px;
+  font-size: 19px;
 }
 
 .hero-cards {
@@ -115,8 +115,8 @@ a { color: inherit; }
 .hero-card span { display: block; font-size: 9px; letter-spacing: 4px; text-transform: uppercase; }
 .hero-card--film span { color: var(--page-accent); }
 .hero-card--decade span { color: var(--accent-b); }
-.hero-card strong { display: block; margin-top: 8px; font-size: 28px; }
-.hero-card small { display: block; margin-top: 6px; color: var(--gold-dim); font-size: 13px; }
+.hero-card strong { display: block; margin-top: 8px; font-size: 32px; }
+.hero-card small { display: block; margin-top: 6px; color: var(--gold-dim); font-size: 16px; }
 
 .comparison-select-wrap {
   display: block;
@@ -125,13 +125,13 @@ a { color: inherit; }
 
 .comparison-select {
   width: 100%;
-  min-height: 42px;
+  min-height: 48px;
   border: 1px solid var(--border-hover);
   background: rgba(5, 5, 15, 0.72);
   color: var(--gold);
   padding: 8px 10px;
   font-family: "Playfair Display", serif;
-  font-size: 20px;
+  font-size: 24px;
 }
 
 .comparison-select option {
@@ -140,8 +140,8 @@ a { color: inherit; }
 }
 
 .comparison-select--small {
-  min-height: 32px;
-  font-size: 16px;
+  min-height: 38px;
+  font-size: 18px;
   margin-top: 4px;
 }
 
@@ -152,8 +152,8 @@ a { color: inherit; }
 
 .comparison-inline > span {
   display: block;
-  color: rgba(232, 213, 163, 0.75);
-  font-size: 10px;
+  color: rgba(242, 230, 200, 0.9);
+  font-size: 12px;
   letter-spacing: 2px;
   text-transform: uppercase;
 }
@@ -161,7 +161,7 @@ a { color: inherit; }
 .comparison-grid { display: grid; gap: 28px; }
 
 .panel { border-top: 1px solid var(--border); padding-top: 26px; }
-.panel h2 { font-size: clamp(24px, 2.5vw, 36px); }
+.panel h2 { font-size: clamp(30px, 2.8vw, 44px); }
 
 /* ── Key metrics ── */
 .metric-grid {

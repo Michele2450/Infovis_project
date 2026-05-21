@@ -32,8 +32,6 @@ const comparisonNodes = {
   genreRows:        document.getElementById("genreRows"),
   placementTrack:   document.getElementById("placementTrack"),
   placementSummary: document.getElementById("placementSummary"),
-  takeawayLead:     document.getElementById("takeawayLead"),
-  takeawaySupport:  document.getElementById("takeawaySupport"),
 };
 
 function getSafeReferenceFilmByRank() {
@@ -111,7 +109,6 @@ function rerenderComparison() {
   buildProfileRows();
   buildGenreRows();
   buildPlacementTrack();
-  buildTakeaway();
   updateComparisonUrl();
 }
 
@@ -343,25 +340,6 @@ function buildPlacementTrack() {
   comparisonNodes.placementSummary.textContent =
     `${comparisonFilm.title} maps to ${modeText} in the ${referenceDecade.label} sample` +
     ` and ${pr ? `#${pr.rank}` : "outside the top list"} by vote count.`;
-}
-
-// ── Takeaway ──────────────────────────────────────────────────────────────────
-function buildTakeaway() {
-  const filmGenres     = comparisonFilm.genres || [];
-  const ratingDelta    = comparisonFilm.rating - referenceDecade.avgRating;
-  const voteDelta      = comparisonFilm.votes  - referenceDecade.avgVotes;
-  const strongestGenre = filmGenres
-    .map(g => referenceDecade.genreStats.find(e => e.genre === g))
-    .filter(Boolean)
-    .sort((a, b) => b.percentage - a.percentage)[0];
-
-  comparisonNodes.takeawayLead.textContent =
-    `${comparisonFilm.title} is ${ratingDelta >= 0 ? "above" : "below"} the decade's average rating by ${Math.abs(ratingDelta).toFixed(1)} points` +
-    ` and ${voteDelta >= 0 ? "over-indexes" : "under-indexes"} on audience attention by ${formatVotes(Math.abs(voteDelta))}.`;
-
-  comparisonNodes.takeawaySupport.textContent = strongestGenre
-    ? `${strongestGenre.genre} is the film's strongest historical fit: it appears in ${strongestGenre.percentage}% of the decade's ranked titles.`
-    : "Its genre profile is relatively uncommon within the decade ranking.";
 }
 
 // ── Entry point ───────────────────────────────────────────────────────────────
