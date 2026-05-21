@@ -1,0 +1,54 @@
+:root {
+  --bg-page: #05050f;
+  --bg-card: rgba(232, 213, 163, 0.04);
+  --bg-surface: rgba(10, 10, 18, 0.85);
+  --text-main: #e8d5a3;
+  --text-secondary: rgba(232, 213, 163, 0.78);
+  --accent: #d4a84b;
+  --border: rgba(232, 213, 163, 0.12);
+  --border-strong: rgba(232, 213, 163, 0.35);
+  --grid: rgba(255, 255, 255, 0.08);
+  --axis: rgba(255, 255, 255, 0.2);
+
+  --title-size: 36px;
+  --subtitle-size: 16px;
+  --axis-label-size: 16px;
+  --tick-size: 13px;
+  --tooltip-size: 13px;
+  --card-pad: 40px;
+  --card-radius: 16px;
+}
+
+.viz-empty,
+.viz-loading,
+.viz-error {
+  min-height: 240px;
+  display: grid;
+  place-items: center;
+  color: var(--text-secondary);
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 18px;
+  letter-spacing: 0.3px;
+}
+
+.viz-error {
+  color: #f1b3b3;
+  border-color: rgba(241, 179, 179, 0.35);
+}
+
+.legend-unified {
+  color: var(--text-secondary);
+  font-size: 12px;
+  letter-spacing: 0.8px;
+}
+
+.tooltip-unified {
+  background: rgba(8, 8, 14, 0.96);
+  color: var(--text-main);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  box-shadow: none;
+  font-size: var(--tooltip-size);
+}

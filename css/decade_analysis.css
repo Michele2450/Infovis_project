@@ -1,3 +1,5 @@
+@import url("./theme.css");
+
 /* decade_analysis.css */
 
 *, *::before, *::after {
@@ -279,12 +281,12 @@ body::after {
   width: 100%;
   min-height: 860px;
 
-  padding: 40px;
+  padding: var(--card-pad);
 
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: var(--bg-panel);
 
-  border-radius: 16px;
+  border-radius: var(--card-radius);
   backdrop-filter: none;
   box-shadow: none;
 }
@@ -320,7 +322,7 @@ body::after {
 }
 
 .viz-header h2 {
-  font-size: 36px;
+  font-size: var(--title-size);
   letter-spacing: 3px;
   font-weight: 600;
   margin-bottom: 8px;
@@ -330,7 +332,7 @@ body::after {
 
 .viz-header p {
   color: var(--text-secondary);
-  font-size: 16px;
+  font-size: var(--subtitle-size);
   font-family: 'Cormorant Garamond', serif;
 }
 
@@ -339,7 +341,7 @@ body::after {
 }
 
 .analysis-page .viz-card:first-of-type .viz-header p {
-  font-size: 16px;
+  font-size: var(--subtitle-size);
 }
 
 .genre-filters {
@@ -387,12 +389,12 @@ body::after {
 }
 
 .viz-card--line .viz-header h2 {
-  font-size: 36px;
+  font-size: var(--title-size);
   color: #e8d5a3;
 }
 
 .viz-card--line .viz-header p {
-  font-size: 16px;
+  font-size: var(--subtitle-size);
   color: #AFA58F;
 }
 
@@ -400,6 +402,54 @@ body::after {
   display: flex;
   gap: 8px;
   margin: 0 0 8px;
+}
+
+.viz-actions {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 8px;
+  flex-wrap: wrap;
+}
+
+.slope-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: end;
+  margin-bottom: 10px;
+}
+
+.slope-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+#slopeGenreFilter {
+  background: rgba(80, 80, 80, 0.35);
+  border: 1px solid rgba(232, 213, 163, 0.28);
+  color: var(--text-main);
+}
+
+#slopeGenreFilter option {
+  background: #2f2f35;
+  color: var(--text-main);
+}
+
+.slope-line {
+  opacity: 0.75;
+  stroke-width: 2.2;
+  cursor: pointer;
+}
+
+.slope-point {
+  r: 6;
+}
+
+.slope-muted {
+  opacity: 0.18 !important;
 }
 
 .line-toggle {
@@ -502,12 +552,12 @@ body::after {
 
 .viz-card--line .axis-label {
   fill: #F2E6C8;
-  font-size: 16px;
+  font-size: var(--axis-label-size);
 }
 
 .viz-card--line .tick-label {
   fill: #B8AA8A;
-  font-size: 13px;
+  font-size: var(--tick-size);
 }
 
 .viz-card--line .chart-title {
@@ -519,8 +569,8 @@ body::after {
   position: absolute;
   z-index: 30;
   pointer-events: none;
-  background: #111111;
-  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(8, 8, 14, 0.96);
+  border: 1px solid rgba(232, 213, 163, 0.35);
   color: #F2E8D0;
   padding: 8px 10px;
   border-radius: 8px;
@@ -541,13 +591,13 @@ body::after {
 }
 
 .viz-card--bubble .viz-header h2 {
-  font-size: 36px;
+  font-size: var(--title-size);
   color: #e8d5a3;
   letter-spacing: 1.2px;
 }
 
 .viz-card--bubble .viz-header p {
-  font-size: 16px;
+  font-size: var(--subtitle-size);
   color: #AFA58F;
 }
 
@@ -605,7 +655,7 @@ body::after {
 
 .bubble-axis-label {
   fill: #CFC4A8;
-  font-size: 18px;
+  font-size: var(--axis-label-size);
 }
 
 .bubble-axis-label-x {
@@ -614,7 +664,7 @@ body::after {
 
 .bubble-tick {
   fill: #F2E6C8;
-  font-size: 14px;
+  font-size: var(--tick-size);
 }
 
 .bubble-legends {
@@ -672,8 +722,8 @@ body::after {
   position: absolute;
   z-index: 30;
   pointer-events: none;
-  background: #111111;
-  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(8, 8, 14, 0.96);
+  border: 1px solid rgba(232, 213, 163, 0.35);
   color: #F2E8D0;
   padding: 8px 10px;
   border-radius: 8px;
@@ -695,6 +745,32 @@ body::after {
 
 .bubble-detail:empty {
   display: none;
+}
+
+.bubble-summary {
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-family: "Cormorant Garamond", serif;
+}
+
+.pin-compare {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pin-card {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  border-radius: 8px;
+  padding: 8px;
+  color: var(--text-main);
+  font-size: 12px;
 }
 
 .bubble-notes {
@@ -755,6 +831,13 @@ body::after {
   margin-top: -2px;
 }
 
+.heatmap-wrap {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 10px 8px 8px;
+}
+
 .decade-picker-row {
   margin: 0 0 8px;
 }
@@ -764,6 +847,13 @@ body::after {
 .bubble-chart .bubble-svg {
   transform: scale(1.0);
   transform-origin: top center;
+}
+
+.line-series,
+.line-point,
+.bubble-point,
+.hm-cell {
+  transition: opacity 0.25s ease, transform 0.25s ease, stroke-width 0.2s ease;
 }
 
 .line-chart .line-svg {
@@ -842,8 +932,8 @@ body::after {
   position: absolute;
   z-index: 40;
   pointer-events: none;
-  background: rgba(17, 17, 17, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(8, 8, 14, 0.96);
+  border: 1px solid rgba(232, 213, 163, 0.35);
   color: #F2E8D0;
   padding: 8px 10px;
   border-radius: 8px;
@@ -911,13 +1001,29 @@ body::after {
     gap: 34px;
   }
 
+  .line-controls,
+  .bubble-controls,
+  .genre-filters {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    padding-bottom: 6px;
+  }
+
+  .line-controls > *,
+  .bubble-controls > *,
+  .genre-filters > * {
+    flex: 0 0 auto;
+  }
+
   .viz-card {
     min-height: auto;
     padding: 20px;
   }
 
   .viz-header h2 {
-    font-size: 34px;
+    font-size: 30px;
   }
 
   .viz-header p {

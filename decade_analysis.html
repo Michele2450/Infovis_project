@@ -29,7 +29,6 @@
   <a href="index.html" class="back-btn">← Back</a>
 
   <main class="analysis-page">
-
     <section class="viz-card">
       <div class="viz-header">
         <div>
@@ -39,8 +38,7 @@
           </p>
         </div>
       </div>
-
-      <div class="chart-wrap">
+      <div class="chart-wrap heatmap-wrap">
         <div id="heatmapChart" class="heatmap-chart"></div>
         <div id="heatmapTooltip" class="heatmap-tooltip" hidden></div>
         <div class="scale-legend">
@@ -77,6 +75,10 @@
             <option value="median">Median</option>
           </select>
         </label>
+      </div>
+      <div class="viz-actions">
+        <button id="lineResetFiltersBtn" class="line-toggle">Reset filters</button>
+        <button id="lineResetViewBtn" class="line-toggle">Back to default view</button>
       </div>
       <div class="decade-picker-row">
         <label class="line-select-wrap" for="globalDecadeSelect">
@@ -149,11 +151,17 @@
           <option value="rating">Color by rating</option>
         </select>
       </div>
+      <div class="viz-actions">
+        <button id="bubbleResetFiltersBtn" class="line-toggle">Reset filters</button>
+        <button id="bubbleResetHighlightsBtn" class="line-toggle">Reset highlights</button>
+        <button id="bubbleResetViewBtn" class="line-toggle">Back to default view</button>
+      </div>
 
       <div class="chart-wrap">
         <div id="bubbleChart" class="bubble-chart"></div>
         <div id="bubbleChartTooltip" class="bubble-tooltip" hidden></div>
         <aside id="bubbleDetailPanel" class="bubble-detail"></aside>
+        <div id="bubbleBrushSummary" class="bubble-summary"></div>
       </div>
     </section>
 

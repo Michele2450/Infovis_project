@@ -1,3 +1,5 @@
+@import url("./theme.css");
+
 :root {
   --page-accent: #d4a84b;
   --gold: #e8d5a3;
@@ -125,11 +127,16 @@ a { color: inherit; }
   width: 100%;
   min-height: 42px;
   border: 1px solid var(--border-hover);
-  background: rgba(232, 213, 163, 0.05);
+  background: rgba(5, 5, 15, 0.72);
   color: var(--gold);
   padding: 8px 10px;
   font-family: "Playfair Display", serif;
   font-size: 20px;
+}
+
+.comparison-select option {
+  background: #05050f;
+  color: var(--gold);
 }
 
 .comparison-select--small {

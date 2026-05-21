@@ -23,6 +23,7 @@ const trackEl = document.getElementById("track");
 const dotsEl = document.getElementById("dots");
 const ctaBtn = document.getElementById("ctaBtn");
 const analysisBtn = document.getElementById("analysisBtn");
+const aboutBtn = document.getElementById("aboutBtn");
 const overlay = document.getElementById("overlay");
 
 function starSVG(fill, active) {
@@ -84,6 +85,7 @@ function render() {
     analysisBtn.href = `decade_analysis.html?decade=${DECADES[current].slug}&rank=1`;
     analysisBtn.classList.add("visible");
   }
+  if (aboutBtn) aboutBtn.classList.add("visible");
 }
 
 ctaBtn.addEventListener("click", (e) => {
@@ -95,6 +97,13 @@ if (analysisBtn) {
   analysisBtn.addEventListener("click", (e) => {
     e.preventDefault();
     navigateTo(`decade_analysis.html?decade=${DECADES[current].slug}&rank=1`);
+  });
+}
+
+if (aboutBtn) {
+  aboutBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    navigateTo("about.html");
   });
 }
 

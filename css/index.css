@@ -1,3 +1,5 @@
+@import url("./theme.css");
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -169,9 +171,12 @@ body::after {
 .decade-item.active .decade-info { color: var(--gold-mid); font-size: 11px; }
 
 .cta-wrap {
-  margin-top: 36px; height: 48px;
-  display: flex; align-items: center; justify-content: center;
-  gap: 12px;
+  margin-top: 36px; min-height: 48px;
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: center;
+  column-gap: 12px;
+  row-gap: 12px;
 }
 
 .cta-btn {
@@ -192,6 +197,13 @@ body::after {
 
 .cta-btn--secondary {
   font-family: "Playfair Display", serif;
+}
+
+.cta-btn--about {
+  width: auto;
+  grid-column: 1 / span 2;
+  justify-self: center;
+  justify-content: center;
 }
 
 .dots { display: flex; gap: 8px; margin-top: 28px; z-index: 10; position: relative; }
