@@ -220,13 +220,13 @@ function buildBulletChart() {
     const zone  = `<rect x="${zxMin.toFixed(1)}" y="${y0+20}" width="${zoneW.toFixed(1)}" height="${barH}" style="fill:rgba(123,159,212,0.18);stroke:rgba(123,159,212,0.3);stroke-width:1"></rect>`;
 
     // Label min/max della zona blu — sopra la barra, fuori dalla zona
-    const zMinLabel = `<text x="${zxMin.toFixed(1)}" y="${y0+17}" text-anchor="middle" style="fill:rgba(123,159,212,0.7);font-size:10px;font-family:Cormorant Garamond,serif">${m.fmt(m.dMin)}${m.unit}</text>`;
-    const zMaxLabel = `<text x="${zxMax.toFixed(1)}" y="${y0+17}" text-anchor="middle" style="fill:rgba(123,159,212,0.7);font-size:10px;font-family:Cormorant Garamond,serif">${m.fmt(m.dMax)}${m.unit}</text>`;
+    const zMinLabel = `<text x="${zxMin.toFixed(1)}" y="${y0+17}" text-anchor="middle" style="fill:rgba(162,191,232,0.95);font-size:11px;font-family:Cormorant Garamond,serif">${m.fmt(m.dMin)}${m.unit}</text>`;
+    const zMaxLabel = `<text x="${zxMax.toFixed(1)}" y="${y0+17}" text-anchor="middle" style="fill:rgba(162,191,232,0.95);font-size:11px;font-family:Cormorant Garamond,serif">${m.fmt(m.dMax)}${m.unit}</text>`;
 
     // Linea media decade — sopra la barra
     const ax = xAt(m.avg);
     const avgLine  = `<line x1="${ax.toFixed(1)}" y1="${y0+14}" x2="${ax.toFixed(1)}" y2="${y0+46}" style="stroke:${decadeColor};stroke-width:2;stroke-dasharray:4 3"></line>`;
-    const avgLabel = `<text x="${ax.toFixed(1)}" y="${y0+12}" text-anchor="middle" style="fill:${decadeColor};font-size:10px;font-family:Cormorant Garamond,serif">avg ${m.fmt(m.avg)}${m.unit}</text>`;
+    const avgLabel = `<text x="${ax.toFixed(1)}" y="${y0+12}" text-anchor="middle" style="fill:#b5d2ff;font-size:11px;font-family:Cormorant Garamond,serif">avg ${m.fmt(m.avg)}${m.unit}</text>`;
 
     // Diamante film
     const fx = xAt(m.film);
@@ -238,11 +238,11 @@ function buildBulletChart() {
     const ticks = m.ticks.map(t => {
       const tx = xAt(t);
       const tickVal = (m.label === "Votes" && t === 0) ? "0" : `${m.fmt(t)}${m.unit}`;
-      return `<line x1="${tx.toFixed(1)}" y1="${y0+42}" x2="${tx.toFixed(1)}" y2="${y0+48}" style="stroke:rgba(232,213,163,0.2);stroke-width:1"></line>
-              <text x="${tx.toFixed(1)}" y="${y0+58}" text-anchor="middle" style="fill:rgba(232,213,163,0.25);font-size:10px;font-family:Cormorant Garamond,serif">${tickVal}</text>`;
+      return `<line x1="${tx.toFixed(1)}" y1="${y0+42}" x2="${tx.toFixed(1)}" y2="${y0+48}" style="stroke:rgba(242,230,200,0.45);stroke-width:1"></line>
+              <text x="${tx.toFixed(1)}" y="${y0+58}" text-anchor="middle" style="fill:rgba(242,230,200,0.9);font-size:11px;font-family:Cormorant Garamond,serif">${tickVal}</text>`;
     }).join("");
 
-    const label = `<text x="${lw-10}" y="${y0+35}" text-anchor="end" style="fill:rgba(232,213,163,0.85);font-size:15px;font-family:Cormorant Garamond,serif">${m.label}</text>`;
+    const label = `<text x="${lw-10}" y="${y0+35}" text-anchor="end" style="fill:#f2e6c8;font-size:16px;font-family:Cormorant Garamond,serif">${m.label}</text>`;
 
     return [label, barBg, zone, zMinLabel, zMaxLabel, ticks, avgLine, diamond, avgLabel, filmLabel].join("");
   });
@@ -253,7 +253,7 @@ function buildBulletChart() {
     <line x1="118" y1="4" x2="118" y2="18" style="stroke:${decadeColor};stroke-width:2;stroke-dasharray:4 3"></line>
     <text x="126" y="14" style="fill:#e8d5a3;font-size:12px;font-family:Cormorant Garamond,serif">Decade average</text>
     <rect x="250" y="5" width="28" height="10" style="fill:rgba(123,159,212,0.15);stroke:rgba(123,159,212,0.25);stroke-width:1"></rect>
-    <text x="284" y="14" style="fill:rgba(232,213,163,0.5);font-size:12px;font-family:Cormorant Garamond,serif">Top-20 range</text>
+    <text x="284" y="14" style="fill:rgba(242,230,200,0.88);font-size:12px;font-family:Cormorant Garamond,serif">Top-20 range</text>
   `;
 
   el.innerHTML = `<svg viewBox="0 0 ${svgW} ${svgH + 30}" style="width:100%;height:auto;display:block;overflow:visible">
