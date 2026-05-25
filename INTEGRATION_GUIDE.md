@@ -43,6 +43,11 @@ The script will:
 
 ---
 
+
+## Step2 2.1 - download the poster using the api
+
+python scripts/fetch_posters.py --key API-KEY
+
 ## Step 3 — Start the Flask server
 
 ```bash
