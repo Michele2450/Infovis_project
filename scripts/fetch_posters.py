@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+
 """
 fetch_posters.py
-Recupera i poster TMDb solo per i top 20 film per decade.
-Usage: python scripts/fetch_posters.py --key TUA_API_KEY
+Get's the posters for the top 20 films per decade.
+Usage: python scripts/fetch_posters.py --key YOUR_TMDB_KEY
 """
 
 import argparse, sqlite3, time, os
@@ -11,7 +11,7 @@ from pathlib import Path
 try:
     import requests
 except ImportError:
-    raise SystemExit("Installa requests: pip install requests")
+    raise SystemExit("Install requests: pip install requests")
 
 TMDB_BASE   = "https://api.themoviedb.org/3"
 POSTER_BASE = "https://image.tmdb.org/t/p/w500"
@@ -26,7 +26,7 @@ def parse_args():
     p.add_argument("--key",   required=True, help="TMDb API key")
     p.add_argument("--db",    default=DB_DEFAULT)
     p.add_argument("--delay", type=float, default=0.25)
-    p.add_argument("--reset", action="store_true", help="Riscarica anche i poster già presenti")
+    p.add_argument("--reset", action="store_true", help="Also fetch posters for films that already have one")
     return p.parse_args()
 
 def ensure_poster_column(conn):
@@ -34,7 +34,7 @@ def ensure_poster_column(conn):
     if "poster" not in cols:
         conn.execute("ALTER TABLE movies ADD COLUMN poster TEXT")
         conn.commit()
-        print("Colonna poster aggiunta")
+        print("Column poster added")
 
 def get_top20_tconsts(conn):
     result = []
@@ -59,7 +59,7 @@ def fetch_poster(tconst, api_key, session):
         resp.raise_for_status()
         data = resp.json()
     except requests.RequestException as e:
-        print(f"    Errore rete: {e}")
+        print(f"    Network error: {e}")
         return None
 
     for key in ("movie_results", "tv_results", "tv_episode_results"):
@@ -78,7 +78,7 @@ def main():
     if not args.reset:
         films = [(t, title, poster, d) for t, title, poster, d in films if not poster]
 
-    print(f"Film da processare: {len(films)}\n")
+    print(f"Films to process: {len(films)}\n")
 
     session = requests.Session()
     found = missing = 0

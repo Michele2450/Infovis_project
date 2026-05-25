@@ -394,7 +394,7 @@ function renderScatterPlot(film) {
     return;
   }
 
-  // Assi fissi: rating 0-10, runtime 0-max arrotondato a 30min
+  // fixed axis: rating 0-10, runtime 0-max rounded at 30min
   const ratingMax  = 10;
   const runtimeMax = Math.ceil(Math.max(...withRuntime.map(f => f.runtime)) / 30) * 30;
 
@@ -403,13 +403,13 @@ function renderScatterPlot(film) {
   const x  = rt   => m.left + (rt   / runtimeMax) * pw;
   const y  = rate => m.top  + (1 - rate / ratingMax) * ph;
 
-  // Grid orizzontale
+  // orizontal Grid 
   const hGrid = [2, 4, 6, 8, 10].map(t => `
     <line x1="${m.left}" y1="${y(t).toFixed(1)}" x2="${w-m.right}" y2="${y(t).toFixed(1)}" stroke="rgba(232,213,163,0.1)" stroke-dasharray="3 5"></line>
     <text x="${m.left-8}" y="${y(t)+4}" text-anchor="end" style="fill:rgba(232,213,163,0.55);font-size:11px">${t}</text>
   `).join("");
 
-  // Grid verticale
+  // vertical Grid 
   const rtStep = runtimeMax <= 120 ? 30 : runtimeMax <= 210 ? 60 : 90;
   const vTicks = [];
   for (let t = 0; t <= runtimeMax; t += rtStep) vTicks.push(t);
@@ -418,7 +418,7 @@ function renderScatterPlot(film) {
     <text x="${x(t).toFixed(1)}" y="${h-m.bottom+14}" text-anchor="middle" style="fill:rgba(232,213,163,0.45);font-size:11px">${t}</text>
   `).join("");
 
-  // Punti colorati per genere
+  //colored point for each genre
   const points = withRuntime.map(f => {
     const isActive = f.rank === film.rank;
     const genre    = (f.genres && f.genres[0]) ? f.genres[0] : "Other";
@@ -443,7 +443,7 @@ function renderScatterPlot(film) {
     <text x="14" y="${m.top + ph/2}" text-anchor="middle" style="fill:rgba(232,213,163,0.5);font-size:12px" transform="rotate(-90 14 ${m.top + ph/2})">IMDb rating</text>
   `;
 
-  // Click e hover
+  // Click and hover
   chartNodes.scatterPlot.querySelectorAll("circle[data-rank]").forEach((circle) => {
     circle.addEventListener("click", () => {
       const clicked = decade.films.find(f => f.rank === parseInt(circle.dataset.rank, 10));
@@ -726,9 +726,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (err) {
     document.body.innerHTML = `
       <main style="padding:60px 32px;font-family:serif;color:#e8d5a3;background:#05050f;min-height:100vh">
-        <p style="opacity:.5;letter-spacing:3px;font-size:11px;text-transform:uppercase">Errore</p>
-        <h1 style="font-size:36px;margin-top:12px">Impossibile caricare ${decadeLabel}</h1>
-        <p style="opacity:.6;margin-top:16px">Assicurati che il server Flask sia avviato su localhost:5000.</p>
+        <p style="opacity:.5;letter-spacing:3px;font-size:11px;text-transform:uppercase">Error</p>
+        <h1 style="font-size:36px;margin-top:12px">Can't load ${decadeLabel}</h1>
+        <p style="opacity:.6;margin-top:16px">Make sure the flask server is loaded in the right entry point: localhost:5000 or 5050.</p>
         <p style="opacity:.4;margin-top:8px;font-size:12px">${err.message}</p>
         <a href="index.html" style="display:inline-block;margin-top:32px;color:inherit">← Torna all'indice</a>
       </main>`;

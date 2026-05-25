@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """api.py — Cinema through the Decades · Flask back-end"""
 
 import sqlite3, os
@@ -68,7 +67,7 @@ def build_decade_response(decade_str):
         (decade, MIN_VOTES)
     ).fetchone()
 
-    # genreStats: ogni genere appare in quanti film sui TOP_N
+    # genreStats: every genre with its percentage among the top films of the decade
     genre_counts = {}
     for f in films:
         for g in f["genres"]:

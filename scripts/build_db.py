@@ -60,7 +60,7 @@ def import_csv(conn, csv_path):
             year   = safe_int(row.get("startYear") or row.get("year"))
             decade = (year // 10) * 10 if year else None
 
-            # Genres: può arrivare con virgolette tipo "Drama,Crime"
+            # Genres: can come with quotes like "Drama,Crime"
             genres_raw = (row.get("genres") or "").strip().strip('"')
             genres = None if genres_raw in ("", "\\N") else genres_raw
 
