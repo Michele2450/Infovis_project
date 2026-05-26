@@ -54,7 +54,7 @@ python scripts/fetch_posters.py --key API-KEY
 python api.py
 ```
 
-The server runs on `http://localhost:5000`or 5050
+The server runs on `http://localhost:5000`or 5050 you can change it in the file data/all_decades.js there is a constant :const API_BASE = 'http://localhost:5000';
 ---
 
 ## Available endpoints
