@@ -112,7 +112,7 @@ function rerenderComparison() {
   updateComparisonUrl();
 }
 
-// ── Header ────────────────────────────────────────────────────────────────────
+
 function renderComparisonHeader() {
   document.documentElement.style.setProperty("--page-accent", referenceDecade.meta.accent);
   document.title = `${comparisonFilm.title} vs ${referenceDecade.label}`;
@@ -124,7 +124,7 @@ function renderComparisonHeader() {
   comparisonNodes.backLinks.forEach((link) => { link.href = `${sourceDecade.label}.html`; });
 }
 
-// ── Key metrics ───────────────────────────────────────────────────────────────
+
 function buildMetricGrid() {
   const filmRuntime   = comparisonFilm.runtime || 0;
   const decadeRuntime = Math.round(referenceDecade.avgRuntime || 0);
@@ -152,7 +152,6 @@ function buildMetricGrid() {
   });
 }
 
-// ── Bullet chart ──────────────────────────────────────────────────────────────
 function buildBulletChart() {
   const el = document.getElementById("bulletChart");
   if (!el) return;
@@ -165,7 +164,6 @@ function buildBulletChart() {
   const allVotes    = referenceDecade.films.map(f => f.votes).filter(Number.isFinite);
   const allRuntimes = referenceDecade.films.map(f => f.runtime).filter(Number.isFinite);
 
-  // Scale fisse con 0 come origine
   const allRatings  = referenceDecade.films.map(f => f.rating).filter(Number.isFinite);
 
   const metrics = [
@@ -210,31 +208,25 @@ function buildBulletChart() {
     const xAt   = v => lw + ((Math.min(Math.max(v, m.scaleMin), m.scaleMax) - m.scaleMin) / range) * bw;
     const y0    = i * rowH;
 
-    // Sfondo barra (tutto il range scala)
     const barBg = `<rect x="${lw}" y="${y0+20}" width="${bw}" height="${barH}" style="fill:rgba(232,213,163,0.04);stroke:rgba(232,213,163,0.15);stroke-width:1"></rect>`;
 
-    // Zona blu: range effettivo dei top-20
     const zxMin = xAt(m.dMin);
     const zxMax = xAt(m.dMax);
     const zoneW = Math.max(0, zxMax - zxMin);
     const zone  = `<rect x="${zxMin.toFixed(1)}" y="${y0+20}" width="${zoneW.toFixed(1)}" height="${barH}" style="fill:rgba(123,159,212,0.18);stroke:rgba(123,159,212,0.3);stroke-width:1"></rect>`;
 
-    // Label min/max della zona blu — sopra la barra, fuori dalla zona
     const zMinLabel = `<text x="${zxMin.toFixed(1)}" y="${y0+17}" text-anchor="middle" style="fill:rgba(162,191,232,0.95);font-size:11px;font-family:Cormorant Garamond,serif">${m.fmt(m.dMin)}${m.unit}</text>`;
     const zMaxLabel = `<text x="${zxMax.toFixed(1)}" y="${y0+17}" text-anchor="middle" style="fill:rgba(162,191,232,0.95);font-size:11px;font-family:Cormorant Garamond,serif">${m.fmt(m.dMax)}${m.unit}</text>`;
 
-    // Linea media decade — sopra la barra
     const ax = xAt(m.avg);
     const avgLine  = `<line x1="${ax.toFixed(1)}" y1="${y0+14}" x2="${ax.toFixed(1)}" y2="${y0+46}" style="stroke:${decadeColor};stroke-width:2;stroke-dasharray:4 3"></line>`;
     const avgLabel = `<text x="${ax.toFixed(1)}" y="${y0+12}" text-anchor="middle" style="fill:#b5d2ff;font-size:11px;font-family:Cormorant Garamond,serif">avg ${m.fmt(m.avg)}${m.unit}</text>`;
 
-    // Diamante film
     const fx = xAt(m.film);
     const fy = y0 + 20 + barH / 2;
     const diamond   = `<polygon points="${fx},${fy-10} ${fx+9},${fy} ${fx},${fy+10} ${fx-9},${fy}" style="fill:${filmColor}"></polygon>`;
     const filmLabel = `<text x="${fx.toFixed(1)}" y="${y0+74}" text-anchor="middle" style="fill:${filmColor};font-size:13px;font-weight:bold;font-family:Cormorant Garamond,serif">${m.fmt(m.film)}${m.unit}</text>`;
 
-    // Tick sotto la barra
     const ticks = m.ticks.map(t => {
       const tx = xAt(t);
       const tickVal = (m.label === "Votes" && t === 0) ? "0" : `${m.fmt(t)}${m.unit}`;
@@ -262,7 +254,6 @@ function buildBulletChart() {
   </svg>`;
 }
 
-// ── Profile rows ──────────────────────────────────────────────────────────────
 function buildProfileRows() {
   const filmRuntime   = comparisonFilm.runtime || 0;
   const decadeRuntime = referenceDecade.avgRuntime || 0;
@@ -294,7 +285,6 @@ function buildProfileRows() {
   });
 }
 
-// ── Genre rows ────────────────────────────────────────────────────────────────
 function buildGenreRows() {
   const filmGenres = comparisonFilm.genres || [];
   const combined   = Array.from(new Set([...filmGenres, ...referenceDecade.genreStats.slice(0, 6).map(e => e.genre)])).slice(0, 8);
@@ -323,7 +313,6 @@ function buildGenreRows() {
   });
 }
 
-// ── Placement track ───────────────────────────────────────────────────────────
 function buildPlacementTrack() {
   comparisonNodes.placementTrack.innerHTML = "";
   const aligned = getSafeReferenceFilmByRank() || getClosestReferenceFilmByRating();
@@ -342,7 +331,6 @@ function buildPlacementTrack() {
     ` and ${pr ? `#${pr.rank}` : "outside the top list"} by vote count.`;
 }
 
-// ── Entry point ───────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     await Promise.all([getDecadeData(initialSourceDecadeLabel), getDecadeData(initialReferenceDecadeLabel)]);
