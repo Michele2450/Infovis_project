@@ -279,7 +279,6 @@ function buildProfileRows() {
         <div class="profile-row__fill film"   style="width:${clampPercent(m.film,   m.max)}%"></div>
         <div class="profile-row__fill decade" style="width:${clampPercent(m.decade, m.max)}%"></div>
       </div>
-      <div class="profile-row__footer"><span>This film</span><span>Decade average</span></div>
     `;
     comparisonNodes.profileRows.appendChild(row);
   });

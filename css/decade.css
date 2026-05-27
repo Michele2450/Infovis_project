@@ -640,17 +640,21 @@ a {
 
 .distribution-bar strong {
   display: block;
-  margin-top: 7px;
+  margin-top: 10px;
   font-family: "Playfair Display", serif;
-  font-size: 15px;
+  font-size: clamp(34px, 3.2vw, 52px);
+  line-height: 1;
+  font-weight: 700;
   color: var(--accent);
 }
 
 .distribution-bar span {
   display: block;
-  margin-top: 4px;
+  margin-top: 8px;
   color: var(--gold-dim);
-  font-size: 10px;
+  font-size: clamp(22px, 2vw, 30px);
+  line-height: 1.05;
+  font-weight: 600;
 }
 
 /* Genre overview bars */

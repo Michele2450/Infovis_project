@@ -229,9 +229,9 @@ a { color: inherit; }
   display: flex; justify-content: space-between; gap: 12px; align-items: center;
 }
 
-.profile-row__header span { color: var(--gold); font-size: 15px; }
-.profile-row__header small { color: rgba(242, 230, 200, 0.82); font-size: 13px; }
-.profile-row__footer { font-size: 11px; color: rgba(242, 230, 200, 0.62); margin-top: 4px; }
+.profile-row__header span { color: var(--gold); font-size: 19px; }
+.profile-row__header small { color: rgba(242, 230, 200, 0.9); font-size: 16px; }
+.profile-row__footer { font-size: 14px; color: rgba(242, 230, 200, 0.8); margin-top: 6px; }
 
 .profile-row__track {
   position: relative; height: 44px; margin-top: 8px;
@@ -256,7 +256,7 @@ a { color: inherit; }
   gap: 14px; align-items: center;
 }
 
-.genre-row > span:first-child { font-size: 14px; color: var(--gold); }
+.genre-row > span:first-child { font-size: 18px; color: var(--gold); }
 
 .genre-row__bars {
   position: relative; height: 36px;
@@ -269,7 +269,7 @@ a { color: inherit; }
 .genre-row__bar.film   { top: 0;   height: 55%; background: var(--plot-warm); }
 .genre-row__bar.decade { top: 55%; height: 45%; background: var(--plot-muted); }
 
-.genre-row small { font-size: 12px; color: rgba(232, 213, 163, 0.55); text-align: right; }
+.genre-row small { font-size: 15px; color: rgba(242, 230, 200, 0.82); text-align: right; }
 
 /* ── Placement ── */
 .placement-track {
