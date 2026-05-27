@@ -10,8 +10,8 @@
 
 :root {
   --bg-main: #05050f;
-  --bg-card: #151515;
-  --bg-card-soft: #181818;
+  --bg-card: #05050f;
+  --bg-card-soft: #05050f;
   --bg-control: #111116;
 
   --text-main: #f2e6c8;

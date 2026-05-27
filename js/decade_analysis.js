@@ -134,6 +134,12 @@ function loadStateFromUrl() {
   state.bubble.highlightMode = p.get("hl") || "reset";
   state.bubble.sizeMode = p.get("size") || "votes";
   state.bubble.colorMode = p.get("color") || "release-decade";
+  if (!["reset", "top-rated", "most-voted"].includes(state.bubble.highlightMode)) {
+    state.bubble.highlightMode = "reset";
+  }
+  if (!["release-decade", "genre"].includes(state.bubble.colorMode)) {
+    state.bubble.colorMode = "release-decade";
+  }
 }
 
 async function loadData() {
@@ -871,8 +877,6 @@ function buildBubbleChart() {
       <div class="bubble-legend-size">
         <span>Bubble size: number of IMDb votes</span>
         <div class="bubble-size-scale">${bubbleLegend}</div>
-        <span>Fewer votes</span>
-        <span>More votes</span>
       </div>
       <div class="bubble-notes">
         <span>Highly voted films concentrate after the 1990s.</span>
